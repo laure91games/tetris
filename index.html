@@ -59,7 +59,7 @@
     #next-canvas, #hold-canvas { display: block; background: #0a0a1a; border: 1px solid #333; }
     #hold-box.blocked { opacity: 0.4; }
 
-    /* Challenge box */
+    /* Challenge / Boss box */
     #challenge-box { display: none; }
     #challenge-box.visible { display: block; }
     #challenge-title { font-size: 0.75rem; color: #f0a000; margin-bottom: 4px; }
@@ -68,6 +68,18 @@
     #challenge-progress-fill { height: 100%; background: #f0a000; border-radius: 3px; transition: width 0.3s; width: 0%; }
     #challenge-progress-text { font-size: 0.7rem; color: #f0a000; text-align: right; }
     #challenge-timer { font-size: 1.1rem; color: #e94560; font-weight: bold; margin-top: 4px; }
+
+    /* Boss mode overrides */
+    #challenge-box.boss-mode #challenge-title { color: #e94560; }
+    #challenge-box.boss-mode h3 { color: #e94560; }
+    #challenge-box.boss-mode #challenge-progress-fill { background: #e94560; transition: width 0.5s; }
+    #challenge-box.boss-mode #challenge-progress-text { color: #e94560; }
+    #boss-attack-warning {
+      font-size: 0.75rem; font-weight: bold; color: #e94560;
+      text-align: center; min-height: 1.1em; margin-top: 4px;
+    }
+    #boss-attack-warning.active { animation: boss-flash 0.4s infinite; }
+    @keyframes boss-flash { 50% { opacity: 0.2; } }
 
     /* Controls */
     #controls { font-size: 0.7rem; color: #666; }
@@ -109,7 +121,7 @@
 
     #final-score { font-size: 1.2rem; color: #fff; }
 
-    /* Chapter select */
+    /* Chapter / Boss select scroll */
     #chapter-scroll { max-height: 420px; overflow-y: auto; width: 360px; padding-right: 4px; }
     #chapter-scroll::-webkit-scrollbar { width: 4px; }
     #chapter-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
@@ -152,6 +164,25 @@
     .chapter-card.completed .ch-obj { color: #666; }
     .chapter-badge { font-size: 0.9rem; min-width: 20px; text-align: center; }
 
+    /* Boss cards */
+    .boss-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; background: #1a0a0a; border: 1px solid #3a1020;
+      border-radius: 6px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 8px;
+    }
+    .boss-card:hover:not(.locked) { border-color: #e94560; background: #2a1020; }
+    .boss-card.locked { opacity: 0.3; cursor: default; }
+    .boss-card.completed { border-color: #e9456088; }
+    .boss-icon { font-size: 1.5rem; min-width: 32px; text-align: center; }
+    .boss-info { flex: 1; }
+    .boss-info .b-name { font-size: 0.9rem; color: #e94560; margin-bottom: 2px; font-weight: bold; }
+    .boss-info .b-subtitle { font-size: 0.65rem; color: #888; margin-bottom: 4px; }
+    .boss-info .b-mechanic { font-size: 0.6rem; color: #555; }
+    .boss-card.completed .b-name { color: #c73050; }
+    .boss-badge { font-size: 0.9rem; min-width: 20px; text-align: center; }
+    .boss-hp-preview { font-size: 0.65rem; color: #e94560; opacity: 0.7; }
+
     /* Chapter intro */
     .diff-pill {
       font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
@@ -160,10 +191,16 @@
     .diff-pill.easy   { background: #00c87820; color: #00c878; border: 1px solid #00c878; }
     .diff-pill.medium { background: #f0a00020; color: #f0a000; border: 1px solid #f0a000; }
     .diff-pill.hard   { background: #e9456020; color: #e94560; border: 1px solid #e94560; }
+    .diff-pill.boss   { background: #e9456030; color: #ff6080; border: 1px solid #e94560; letter-spacing: 0.3em; }
 
     #chapter-intro-title { font-size: 1.6rem; color: #eee; letter-spacing: 0.1em; margin: 6px 0 12px; }
     #chapter-intro-narrative { color: #888; font-size: 0.85rem; text-align: center; max-width: 300px; line-height: 1.7; margin-bottom: 4px; }
     .objective-badge { background: #0a0a1a; border: 1px solid #f0a000; border-radius: 4px; padding: 8px 20px; font-size: 0.8rem; color: #f0a000; text-align: center; }
+    .boss-stats-badge {
+      background: #0a0a1a; border: 1px solid #e94560; border-radius: 4px;
+      padding: 10px 20px; font-size: 0.75rem; color: #e94560; text-align: center; line-height: 2;
+    }
+    .boss-stats-badge span { color: #aaa; }
 
     /* Result */
     .result-icon { font-size: 3rem; }
@@ -221,12 +258,13 @@
       <div class="value" id="lines">0</div>
     </div>
     <div class="panel-box" id="challenge-box">
-      <h3>Reto</h3>
+      <h3 id="challenge-box-label">Reto</h3>
       <div id="challenge-title"></div>
       <div id="challenge-obj"></div>
       <div id="challenge-progress-bar"><div id="challenge-progress-fill"></div></div>
       <div id="challenge-progress-text"></div>
       <div id="challenge-timer"></div>
+      <div id="boss-attack-warning"></div>
     </div>
     <div class="panel-box" id="hold-box">
       <h3>Guardada</h3>
@@ -392,6 +430,49 @@ const CHAPTERS = {
 
 const TOTAL_CHAPTERS = DIFFS.reduce((n, d) => n + CHAPTERS[d].length, 0);
 
+// ─── Bosses ──────────────────────────────────────────────────────────────────
+const BOSSES = [
+  {
+    name: 'El Centinela',
+    subtitle: 'Guardián de las Ruinas',
+    narrative: 'Desde las profundidades envía oleadas de escombros.\nDestrúyelo antes de que te entierre vivo.',
+    icon: '👁',
+    hp: 15,
+    attackInterval: 15000,
+    garbageLines: 1,
+    noGhost: false,
+    speed: 600,
+    speedEscalation: false,
+    mechanic: 'Empuja 1 línea de basura cada 15s',
+  },
+  {
+    name: 'La Penumbra',
+    subtitle: 'Señora de las Sombras',
+    narrative: 'Te roba la visión del fantasma.\nJuega a ciegas mientras los escombros no cesan.',
+    icon: '🌑',
+    hp: 20,
+    attackInterval: 20000,
+    garbageLines: 1,
+    noGhost: true,
+    speed: 500,
+    speedEscalation: false,
+    mechanic: 'Sin pieza fantasma + escombros cada 20s',
+  },
+  {
+    name: 'El Titán',
+    subtitle: 'El Destructor Final',
+    narrative: 'Sin fantasma. Sin piedad.\nCada ataque envía dos líneas y lo hace más rápido.',
+    icon: '💀',
+    hp: 30,
+    attackInterval: 10000,
+    garbageLines: 2,
+    noGhost: true,
+    speed: 500,
+    speedEscalation: true,
+    mechanic: 'Sin fantasma + 2 líneas cada 10s + se acelera',
+  },
+];
+
 // ─── Canvas refs ─────────────────────────────────────────────────────────────
 const board      = document.getElementById('board');
 const ctx        = board.getContext('2d');
@@ -406,9 +487,10 @@ let bindings = { ...DEFAULT_BINDINGS };
 let grid, piece, nextPiece, holdPiece, canHold;
 let score, level, lines, paused, gameOver, dropInterval, lastTime, animFrame;
 
-let gameMode = 'free';
+let gameMode = 'free'; // 'free' | 'story' | 'boss'
 let currentChapter = { diff: 'easy', idx: 0 };
 let challengeState = {};
+let bossState = {};
 
 // ─── Profile system ──────────────────────────────────────────────────────────
 let profiles    = JSON.parse(localStorage.getItem('tetrisProfiles') || '{}');
@@ -418,10 +500,10 @@ const EMPTY_PROGRESS = () => ({ easy: [], medium: [], hard: [] });
 
 function currentProfileData() {
   if (!activeProfile || !profiles[activeProfile])
-    return { storyProgress: EMPTY_PROGRESS(), bestScore: 0 };
+    return { storyProgress: EMPTY_PROGRESS(), bossProgress: [], bestScore: 0 };
   const d = profiles[activeProfile];
-  // migrate old flat-array format
   if (Array.isArray(d.storyProgress)) d.storyProgress = EMPTY_PROGRESS();
+  if (!d.bossProgress) d.bossProgress = [];
   return d;
 }
 
@@ -444,6 +526,12 @@ function saveProgress() {
   saveProfiles();
 }
 
+function saveBossProgress() {
+  if (!activeProfile) return;
+  profiles[activeProfile].bossProgress = bossProgress;
+  saveProfiles();
+}
+
 function updateBestScore(s) {
   if (!activeProfile) return;
   if (s > (profiles[activeProfile].bestScore || 0)) {
@@ -454,6 +542,7 @@ function updateBestScore(s) {
 }
 
 let storyProgress = EMPTY_PROGRESS();
+let bossProgress  = [];
 
 function totalCompleted(sp) {
   return DIFFS.reduce((n, d) => n + (sp[d] || []).filter(Boolean).length, 0);
@@ -464,6 +553,11 @@ function diffUnlocked(diff) {
   if (diff === 'medium') return CHAPTERS.easy.every((_, i) => storyProgress.easy[i]);
   if (diff === 'hard')   return CHAPTERS.medium.every((_, i) => storyProgress.medium[i]);
   return false;
+}
+
+function bossUnlocked(idx) {
+  if (idx === 0) return true;
+  return !!bossProgress[idx - 1];
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -485,6 +579,23 @@ function buildPrefilledGrid(filledRows) {
       g[r][c] = c === gap ? 0 : Math.floor(Math.random() * 7) + 1;
   }
   return g;
+}
+
+function pushGarbageLine(count = 1) {
+  for (let n = 0; n < count; n++) {
+    grid.shift();
+    // Boss garbage has 2 gaps making it harder to clear
+    const gaps = new Set();
+    while (gaps.size < 2) gaps.add(Math.floor(Math.random() * COLS));
+    const line = Array.from({ length: COLS }, (_, c) =>
+      gaps.has(c) ? 0 : Math.floor(Math.random() * 7) + 1
+    );
+    grid.push(line);
+  }
+  if (collides(piece, grid)) {
+    piece.y = Math.max(0, piece.y - count);
+    if (collides(piece, grid)) endGame();
+  }
 }
 
 // ─── Pieces ──────────────────────────────────────────────────────────────────
@@ -548,7 +659,9 @@ function clearLines() {
     level = Math.floor(lines / 10) + 1;
     if (gameMode === 'free') dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateUI();
+
     if (gameMode === 'story') checkChallenge(cleared);
+    if (gameMode === 'boss')  dealBossDamage(cleared);
   } else if (gameMode === 'story') {
     checkChallenge(0);
   }
@@ -575,9 +688,23 @@ function checkChallenge(clearedNow) {
   }
 }
 
+function dealBossDamage(cleared) {
+  // 1→1, 2→2, 3→4, 4→6 (bonus for tetris)
+  const dmg = [0, 1, 2, 4, 6][Math.min(cleared, 4)];
+  bossState.hp = Math.max(0, bossState.hp - dmg);
+  updateBossUI();
+  if (bossState.hp <= 0) bossVictory();
+}
+
 function updateChallengeUI(text, pct) {
   document.getElementById('challenge-progress-text').textContent = text;
   document.getElementById('challenge-progress-fill').style.width = (pct * 100) + '%';
+}
+
+function updateBossUI() {
+  const pct = bossState.hp / bossState.maxHp;
+  document.getElementById('challenge-progress-fill').style.width = (pct * 100) + '%';
+  document.getElementById('challenge-progress-text').textContent = `HP: ${bossState.hp} / ${bossState.maxHp}`;
 }
 
 // ─── UI ──────────────────────────────────────────────────────────────────────
@@ -621,10 +748,15 @@ function draw() {
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, grid[r][c]);
-  const ghost = getGhost();
-  for (let r = 0; r < ghost.shape.length; r++)
-    for (let c = 0; c < ghost.shape[r].length; c++)
-      if (ghost.shape[r][c]) drawBlock(ctx, ghost.x+c, ghost.y+r, piece.type, 0.2);
+
+  const showGhost = !(gameMode === 'boss' && BOSSES[bossState.idx]?.noGhost);
+  if (showGhost) {
+    const ghost = getGhost();
+    for (let r = 0; r < ghost.shape.length; r++)
+      for (let c = 0; c < ghost.shape[r].length; c++)
+        if (ghost.shape[r][c]) drawBlock(ctx, ghost.x+c, ghost.y+r, piece.type, 0.2);
+  }
+
   for (let r = 0; r < piece.shape.length; r++)
     for (let c = 0; c < piece.shape[r].length; c++)
       if (piece.shape[r][c]) drawBlock(ctx, piece.x+c, piece.y+r, piece.type);
@@ -694,6 +826,34 @@ function gameLoop(ts) {
     }
   }
 
+  if (gameMode === 'boss' && !paused && !gameOver) {
+    const boss = BOSSES[bossState.idx];
+    const elapsed = ts - bossState.lastAttackTs;
+    const rem = Math.max(0, boss.attackInterval - elapsed);
+    const remSec = rem / 1000;
+
+    const warningEl = document.getElementById('boss-attack-warning');
+    if (remSec <= 3) {
+      warningEl.textContent = '⚠ ¡ATAQUE INMINENTE!';
+      warningEl.classList.add('active');
+    } else {
+      warningEl.textContent = '';
+      warningEl.classList.remove('active');
+    }
+
+    document.getElementById('challenge-timer').textContent =
+      remSec <= 3 ? `${Math.ceil(remSec)}` : `Ataque en ${fmtTime(remSec)}`;
+
+    if (elapsed >= boss.attackInterval && !gameOver) {
+      bossState.lastAttackTs = ts;
+      bossState.attackCount = (bossState.attackCount || 0) + 1;
+      pushGarbageLine(boss.garbageLines);
+      if (boss.speedEscalation) {
+        dropInterval = Math.max(150, dropInterval - 25);
+      }
+    }
+  }
+
   draw();
   if (!gameOver) animFrame = requestAnimationFrame(gameLoop);
 }
@@ -721,6 +881,8 @@ function startFreeGame() {
   gameMode = 'free';
   dropInterval = 1000;
   document.getElementById('challenge-box').classList.remove('visible');
+  document.getElementById('challenge-box').classList.remove('boss-mode');
+  document.getElementById('challenge-box-label').textContent = 'Reto';
   document.getElementById('level-box').style.display = '';
   resetGameState();
   hideOverlay();
@@ -738,13 +900,46 @@ function startChapter(diff, idx) {
   document.getElementById('level-box').style.display = 'none';
   const box = document.getElementById('challenge-box');
   box.classList.add('visible');
+  box.classList.remove('boss-mode');
+  document.getElementById('challenge-box-label').textContent = 'Reto';
   document.getElementById('challenge-title').textContent = ch.title;
   document.getElementById('challenge-obj').textContent = ch.objectiveText;
   document.getElementById('challenge-timer').textContent = '';
+  document.getElementById('boss-attack-warning').textContent = '';
   updateChallengeUI('0', 0);
 
   resetGameState(ch.prefilled || 0);
   challengeState.startTs = performance.now();
+  hideOverlay();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function startBoss(idx) {
+  gameMode = 'boss';
+  const boss = BOSSES[idx];
+  dropInterval = boss.speed;
+  bossState = {
+    idx,
+    hp: boss.hp,
+    maxHp: boss.hp,
+    lastAttackTs: 0,
+    attackCount: 0,
+  };
+
+  document.getElementById('level-box').style.display = 'none';
+  const box = document.getElementById('challenge-box');
+  box.classList.add('visible');
+  box.classList.add('boss-mode');
+  document.getElementById('challenge-box-label').textContent = 'Jefe';
+  document.getElementById('challenge-title').textContent = boss.name;
+  document.getElementById('challenge-obj').textContent = boss.subtitle;
+  document.getElementById('challenge-timer').textContent = '';
+  document.getElementById('boss-attack-warning').textContent = '';
+  updateBossUI();
+
+  resetGameState();
+  bossState.lastAttackTs = performance.now();
   hideOverlay();
   if (animFrame) cancelAnimationFrame(animFrame);
   animFrame = requestAnimationFrame(gameLoop);
@@ -755,6 +950,8 @@ function endGame() {
   updateBestScore(score);
   if (gameMode === 'story') {
     chapterFailed();
+  } else if (gameMode === 'boss') {
+    bossDefeated();
   } else {
     showOverlay(`
       <h2>GAME OVER</h2>
@@ -793,7 +990,7 @@ function chapterComplete() {
     <p style="color:${color};font-size:0.75rem;letter-spacing:0.2em">${DIFF_LABELS[diff].toUpperCase()} · ${CHAPTERS[diff][idx].title.toUpperCase()}</p>
     <div class="result-stats">Puntos: <span>${score}</span><br>Líneas: <span>${lines}</span></div>
     ${next ? `<button class="ov-btn" id="btn-next">SIGUIENTE RETO</button>` : '<p style="color:#f0a000">¡Has completado todos los retos!</p>'}
-    <button class="ov-btn secondary" id="btn-chapters">VER CAPÍTULOS</button>
+    <button class="ov-btn secondary" id="btn-chapters">VER RETOS</button>
   `, el => {
     if (next) el.querySelector('#btn-next').onclick = () => showChapterIntro(next.diff, next.idx);
     el.querySelector('#btn-chapters').onclick = showChapterSelect;
@@ -810,10 +1007,62 @@ function chapterFailed() {
     <p style="color:${color};font-size:0.75rem;letter-spacing:0.2em">${DIFF_LABELS[diff].toUpperCase()} · ${CHAPTERS[diff][idx].title.toUpperCase()}</p>
     <div class="result-stats">Puntos: <span>${score}</span><br>Líneas: <span>${lines}</span></div>
     <button class="ov-btn" id="btn-retry">REINTENTAR</button>
-    <button class="ov-btn secondary" id="btn-chapters">VER CAPÍTULOS</button>
+    <button class="ov-btn secondary" id="btn-chapters">VER RETOS</button>
   `, el => {
     el.querySelector('#btn-retry').onclick = () => showChapterIntro(diff, idx);
     el.querySelector('#btn-chapters').onclick = showChapterSelect;
+  });
+}
+
+function bossVictory() {
+  gameOver = true;
+  updateBestScore(score);
+  const idx = bossState.idx;
+  bossProgress[idx] = true;
+  saveBossProgress();
+
+  const boss = BOSSES[idx];
+  const nextIdx = idx + 1 < BOSSES.length ? idx + 1 : null;
+  showOverlay(`
+    <div class="result-icon">🏆</div>
+    <h2 style="color:#f0a000">¡VICTORIA!</h2>
+    <p style="color:#e94560;font-size:0.75rem;letter-spacing:0.2em">JEFE DERROTADO · ${boss.name.toUpperCase()}</p>
+    <div class="result-stats">
+      Puntos: <span>${score}</span><br>
+      Líneas: <span>${lines}</span><br>
+      Ataques del jefe: <span>${bossState.attackCount}</span>
+    </div>
+    ${nextIdx !== null && bossUnlocked(nextIdx)
+      ? `<button class="ov-btn" id="btn-next">SIGUIENTE JEFE</button>`
+      : nextIdx !== null
+        ? `<p style="color:#888;font-size:0.75rem">Siguiente jefe desbloqueado</p>`
+        : `<p style="color:#f0a000">¡Has derrotado a todos los jefes!</p>`
+    }
+    <button class="ov-btn secondary" id="btn-bosses">VER JEFES</button>
+  `, el => {
+    if (nextIdx !== null && bossUnlocked(nextIdx))
+      el.querySelector('#btn-next').onclick = () => showBossIntro(nextIdx);
+    el.querySelector('#btn-bosses').onclick = showBossSelect;
+  });
+}
+
+function bossDefeated() {
+  gameOver = true;
+  const idx = bossState.idx;
+  const boss = BOSSES[idx];
+  showOverlay(`
+    <div class="result-icon">💀</div>
+    <h2>DERROTADO</h2>
+    <p style="color:#e94560;font-size:0.75rem;letter-spacing:0.2em">${boss.icon} ${boss.name.toUpperCase()}</p>
+    <div class="result-stats">
+      Puntos: <span>${score}</span><br>
+      HP restante del jefe: <span>${bossState.hp} / ${bossState.maxHp}</span>
+    </div>
+    <button class="ov-btn" id="btn-retry">VOLVER A INTENTARLO</button>
+    <button class="ov-btn secondary" id="btn-bosses">VER JEFES</button>
+  `, el => {
+    el.querySelector('#btn-retry').onclick = () => showBossIntro(idx);
+    el.querySelector('#btn-bosses').onclick = showBossSelect;
   });
 }
 
@@ -833,15 +1082,18 @@ function showMainMenu() {
   if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
   gameOver = true;
   const done = totalCompleted(storyProgress);
+  const bossDone = bossProgress.filter(Boolean).length;
   showOverlay(`
     <h2>TETRIS</h2>
     <p style="color:#e94560;font-size:0.8rem;letter-spacing:0.15em">👤 ${activeProfile}</p>
     <button class="ov-btn" id="btn-free">MODO LIBRE</button>
-    <button class="ov-btn secondary" id="btn-story">MODO HISTORIA ${done > 0 ? `(${done}/${TOTAL_CHAPTERS})` : ''}</button>
+    <button class="ov-btn secondary" id="btn-story">RETOS ${done > 0 ? `(${done}/${TOTAL_CHAPTERS})` : ''}</button>
+    <button class="ov-btn secondary" id="btn-boss">MODO HISTORIA ${bossDone > 0 ? `(${bossDone}/${BOSSES.length})` : ''}</button>
     <button class="ov-btn secondary" id="btn-change">CAMBIAR JUGADOR</button>
   `, el => {
     el.querySelector('#btn-free').onclick = startFreeGame;
     el.querySelector('#btn-story').onclick = showChapterSelect;
+    el.querySelector('#btn-boss').onclick = showBossSelect;
     el.querySelector('#btn-change').onclick = showProfileSelect;
   });
 }
@@ -852,7 +1104,6 @@ function showChapterSelect() {
 
   const sections = DIFFS.map(diff => {
     const chapters = CHAPTERS[diff];
-    const diffDone = chapters.every((_, i) => storyProgress[diff]?.[i]);
     const unlocked = diffUnlocked(diff);
     const doneCount = chapters.filter((_, i) => storyProgress[diff]?.[i]).length;
 
@@ -888,7 +1139,7 @@ function showChapterSelect() {
   }).join('');
 
   showOverlay(`
-    <h2 style="font-size:1.5rem">MODO HISTORIA</h2>
+    <h2 style="font-size:1.5rem">RETOS</h2>
     <div id="chapter-scroll">${sections}</div>
     <button class="ov-btn secondary" id="btn-back">← VOLVER</button>
   `, el => {
@@ -910,10 +1161,69 @@ function showChapterIntro(diff, idx) {
     <p id="chapter-intro-narrative">${narrativeHtml}</p>
     <div class="objective-badge">🎯 ${ch.objectiveText}</div>
     <button class="ov-btn" id="btn-play">JUGAR</button>
-    <button class="ov-btn secondary" id="btn-back">← CAPÍTULOS</button>
+    <button class="ov-btn secondary" id="btn-back">← RETOS</button>
   `, el => {
     el.querySelector('#btn-play').onclick = () => startChapter(diff, idx);
     el.querySelector('#btn-back').onclick = showChapterSelect;
+  });
+}
+
+function showBossSelect() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  gameOver = true;
+
+  const cards = BOSSES.map((boss, i) => {
+    const done = !!bossProgress[i];
+    const locked = !bossUnlocked(i);
+    return `
+      <div class="boss-card ${locked ? 'locked' : done ? 'completed' : ''}" data-idx="${i}">
+        <div class="boss-icon">${locked ? '🔒' : boss.icon}</div>
+        <div class="boss-info">
+          <div class="b-name">${boss.name}</div>
+          <div class="b-subtitle">${boss.subtitle}</div>
+          <div class="b-mechanic">${boss.mechanic}</div>
+        </div>
+        <div class="boss-badge">
+          ${done ? '🏆' : !locked ? `<div class="boss-hp-preview">❤ ${boss.hp}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  showOverlay(`
+    <h2 style="font-size:1.5rem">MODO HISTORIA</h2>
+    <p style="color:#666;font-size:0.75rem;text-align:center;max-width:300px">Derrota a los jefes limpiando líneas.<br>Cada Tetris hace más daño.</p>
+    <div id="chapter-scroll" style="width:340px">${cards}</div>
+    <button class="ov-btn secondary" id="btn-back">← VOLVER</button>
+  `, el => {
+    el.querySelector('#btn-back').onclick = showMainMenu;
+    el.querySelectorAll('.boss-card:not(.locked)').forEach(card => {
+      card.addEventListener('click', () => showBossIntro(+card.dataset.idx));
+    });
+  });
+}
+
+function showBossIntro(idx) {
+  const boss = BOSSES[idx];
+  const narrativeHtml = boss.narrative.replace(/\n/g, '<br>');
+  const tags = [
+    `❤ HP: ${boss.hp}`,
+    boss.noGhost ? '👻 Sin fantasma' : null,
+    `⚡ Ataca cada ${boss.attackInterval / 1000}s`,
+    boss.speedEscalation ? '📈 Se acelera' : null,
+  ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+
+  showOverlay(`
+    <div class="diff-pill boss">JEFE FINAL</div>
+    <div id="chapter-intro-title">${boss.icon} ${boss.name}</div>
+    <p style="color:#666;font-size:0.8rem;letter-spacing:0.1em">${boss.subtitle}</p>
+    <p id="chapter-intro-narrative">${narrativeHtml}</p>
+    <div class="boss-stats-badge">${tags}</div>
+    <button class="ov-btn" id="btn-play">COMBATIR</button>
+    <button class="ov-btn secondary" id="btn-back">← JEFES</button>
+  `, el => {
+    el.querySelector('#btn-play').onclick = () => startBoss(idx);
+    el.querySelector('#btn-back').onclick = showBossSelect;
   });
 }
 
@@ -929,12 +1239,13 @@ function showProfileSelect() {
         const d = profiles[name];
         const sp = Array.isArray(d.storyProgress) ? EMPTY_PROGRESS() : (d.storyProgress || EMPTY_PROGRESS());
         const done = totalCompleted(sp);
+        const bossDone = (d.bossProgress || []).filter(Boolean).length;
         return `
           <div class="profile-card" data-name="${name}">
             <div class="profile-avatar">${name[0].toUpperCase()}</div>
             <div class="profile-info">
               <div class="p-name">${name}</div>
-              <div class="p-stats">Historia: ${done}/${TOTAL_CHAPTERS} &nbsp;·&nbsp; Récord: ${d.bestScore || 0}</div>
+              <div class="p-stats">Retos: ${done}/${TOTAL_CHAPTERS} &nbsp;·&nbsp; Jefes: ${bossDone}/${BOSSES.length} &nbsp;·&nbsp; Récord: ${d.bestScore || 0}</div>
             </div>
             <button class="profile-delete" data-del="${name}" title="Eliminar">✕</button>
           </div>
@@ -977,7 +1288,7 @@ function showNewProfile() {
       const name = input.value.trim();
       if (!name) { error.textContent = 'Escribe un nombre.'; return; }
       if (profiles[name]) { error.textContent = 'Ya existe ese nombre.'; return; }
-      profiles[name] = { storyProgress: EMPTY_PROGRESS(), bestScore: 0 };
+      profiles[name] = { storyProgress: EMPTY_PROGRESS(), bossProgress: [], bestScore: 0 };
       saveProfiles();
       selectProfile(name);
     };
@@ -989,8 +1300,10 @@ function showNewProfile() {
 
 function selectProfile(name) {
   setActiveProfile(name);
-  const sp = currentProfileData().storyProgress;
+  const d = currentProfileData();
+  const sp = d.storyProgress;
   storyProgress = Array.isArray(sp) ? EMPTY_PROGRESS() : { easy: [...(sp.easy||[])], medium: [...(sp.medium||[])], hard: [...(sp.hard||[])] };
+  bossProgress = [...(d.bossProgress || [])];
   showMainMenu();
 }
 
