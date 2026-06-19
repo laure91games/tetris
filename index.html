@@ -1550,6 +1550,11 @@ function deleteProfile(name) {
 // ─── Keyboard ────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   tryStartMusic();
+  // Evita que el navegador haga scroll con las flechas y el espacio
+  const gameKeys = Object.values(bindings);
+  if (gameKeys.includes(e.key) || gameKeys.map(k=>k.toUpperCase()).includes(e.key)) {
+    e.preventDefault();
+  }
   if (gameOver) return;
   const k = e.key;
   const is = a => k === bindings[a] || k === bindings[a].toUpperCase();
