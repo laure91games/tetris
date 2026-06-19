@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tetris</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Courier New', monospace;
+      color: #eee;
+    }
+
+    #game-container {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    #board-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.3em;
+      color: #e94560;
+      text-shadow: 0 0 20px #e94560aa;
+    }
+
+    canvas {
+      border: 2px solid #e94560;
+      box-shadow: 0 0 30px #e9456055, inset 0 0 30px #00000088;
+      background: #0a0a1a;
+    }
+
+    #side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 140px;
+    }
+
+    .panel-box {
+      border: 2px solid #16213e;
+      background: #16213e;
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .panel-box h3 {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: #888;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .panel-box .value {
+      font-size: 1.6rem;
+      color: #e94560;
+      font-weight: bold;
+    }
+
+    #next-canvas, #hold-canvas {
+      display: block;
+      background: #0a0a1a;
+      border: 1px solid #333;
+    }
+
+    #hold-box.blocked { opacity: 0.4; }
+
+    /* Story challenge box */
+    #challenge-box { display: none; }
+    #challenge-box.visible { display: block; }
+    #challenge-title { font-size: 0.75rem; color: #f0a000; margin-bottom: 4px; }
+    #challenge-obj { font-size: 0.65rem; color: #aaa; margin-bottom: 8px; line-height: 1.4; }
+    #challenge-progress-bar {
+      height: 6px;
+      background: #0a0a1a;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    #challenge-progress-fill {
+      height: 100%;
+      background: #f0a000;
+      border-radius: 3px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+    #challenge-progress-text { font-size: 0.7rem; color: #f0a000; text-align: right; }
+    #challenge-timer { font-size: 1.1rem; color: #e94560; font-weight: bold; margin-top: 4px; }
+
+    /* Controls */
+    #controls { font-size: 0.7rem; color: #666; }
+    #controls table { width: 100%; border-collapse: collapse; }
+    #controls td { padding: 3px 0; vertical-align: middle; }
+    #controls td:first-child { color: #aaa; text-align: right; padding-right: 6px; }
+
+    #edit-controls-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 6px 0;
+      background: transparent;
+      color: #555;
+      border: 1px solid #333;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    #edit-controls-btn:hover { color: #aaa; border-color: #666; }
+
+    /* Keybind modal */
+    #keybind-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000000dd;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+    #keybind-modal.open { display: flex; }
+    #keybind-panel {
+      background: #16213e;
+      border: 2px solid #e94560;
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 280px;
+    }
+    #keybind-panel h2 {
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      color: #e94560;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .keybind-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #ffffff0a;
+      font-size: 0.8rem;
+    }
+    .keybind-row .action-name { color: #aaa; }
+    .keybind-btn {
+      min-width: 80px;
+      padding: 4px 10px;
+      background: #0a0a1a;
+      color: #eee;
+      border: 1px solid #444;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .keybind-btn:hover { border-color: #e94560; color: #e94560; }
+    .keybind-btn.listening {
+      border-color: #f0a000;
+      color: #f0a000;
+      animation: blink 0.7s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.4; } }
+    #keybind-close {
+      margin-top: 16px;
+      width: 100%;
+      padding: 8px 0;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+    }
+    #keybind-close:hover { background: #c73050; }
+    #keybind-conflict {
+      font-size: 0.65rem;
+      color: #e94560;
+      min-height: 1.2em;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* Main overlay */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: #000000cc;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      z-index: 10;
+    }
+
+    #overlay h2 {
+      font-size: 2.5rem;
+      color: #e94560;
+      text-shadow: 0 0 30px #e94560;
+      letter-spacing: 0.2em;
+    }
+
+    #overlay p { color: #aaa; font-size: 0.95rem; text-align: center; max-width: 320px; line-height: 1.6; }
+
+    .ov-btn {
+      padding: 12px 32px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .ov-btn:hover { background: #c73050; }
+    .ov-btn.secondary {
+      background: transparent;
+      border: 1px solid #555;
+      color: #aaa;
+    }
+    .ov-btn.secondary:hover { border-color: #aaa; color: #eee; background: transparent; }
+
+    #final-score { font-size: 1.2rem; color: #fff; }
+
+    /* Chapter select */
+    #chapter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 380px;
+      overflow-y: auto;
+      width: 340px;
+      padding-right: 4px;
+    }
+    #chapter-list::-webkit-scrollbar { width: 4px; }
+    #chapter-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .chapter-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #16213e;
+      border: 1px solid #222;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .chapter-card:hover:not(.locked) { border-color: #e94560; background: #1e2d4e; }
+    .chapter-card.locked { opacity: 0.35; cursor: default; }
+    .chapter-card.completed { border-color: #00f000; }
+
+    .chapter-num {
+      font-size: 1.2rem;
+      color: #e94560;
+      min-width: 28px;
+      text-align: center;
+    }
+    .chapter-card.completed .chapter-num { color: #00f000; }
+    .chapter-card.locked .chapter-num { color: #555; }
+
+    .chapter-info { flex: 1; }
+    .chapter-info .ch-title { font-size: 0.85rem; color: #eee; margin-bottom: 2px; }
+    .chapter-info .ch-obj { font-size: 0.65rem; color: #666; }
+    .chapter-card.completed .ch-obj { color: #00a000; }
+
+    .chapter-badge {
+      font-size: 1rem;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* Chapter intro */
+    #chapter-intro-num {
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      color: #f0a000;
+      text-transform: uppercase;
+    }
+    #chapter-intro-title {
+      font-size: 1.6rem;
+      color: #eee;
+      letter-spacing: 0.1em;
+      margin: 4px 0 12px;
+    }
+    #chapter-intro-narrative {
+      color: #888;
+      font-size: 0.85rem;
+      text-align: center;
+      max-width: 300px;
+      line-height: 1.7;
+      margin-bottom: 4px;
+    }
+    .objective-badge {
+      background: #0a0a1a;
+      border: 1px solid #f0a000;
+      border-radius: 4px;
+      padding: 8px 20px;
+      font-size: 0.8rem;
+      color: #f0a000;
+      text-align: center;
+    }
+
+    /* Chapter result */
+    .result-icon { font-size: 3rem; }
+    .result-stats {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+      line-height: 2;
+    }
+    .result-stats span { color: #aaa; }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <div id="board-wrapper">
+    <h1>TETRIS</h1>
+    <canvas id="board" width="300" height="600"></canvas>
+  </div>
+
+  <div id="side-panel">
+    <div class="panel-box">
+      <h3>Puntos</h3>
+      <div class="value" id="score">0</div>
+    </div>
+    <div class="panel-box" id="level-box">
+      <h3>Nivel</h3>
+      <div class="value" id="level">1</div>
+    </div>
+    <div class="panel-box">
+      <h3>Líneas</h3>
+      <div class="value" id="lines">0</div>
+    </div>
+    <div class="panel-box" id="challenge-box">
+      <h3>Reto</h3>
+      <div id="challenge-title"></div>
+      <div id="challenge-obj"></div>
+      <div id="challenge-progress-bar"><div id="challenge-progress-fill"></div></div>
+      <div id="challenge-progress-text"></div>
+      <div id="challenge-timer"></div>
+    </div>
+    <div class="panel-box" id="hold-box">
+      <h3>Guardada</h3>
+      <canvas id="hold-canvas" width="120" height="120"></canvas>
+    </div>
+    <div class="panel-box">
+      <h3>Siguiente</h3>
+      <canvas id="next-canvas" width="120" height="120"></canvas>
+    </div>
+    <div class="panel-box" id="controls">
+      <h3>Controles</h3>
+      <table id="controls-table"></table>
+      <button id="edit-controls-btn">EDITAR</button>
+    </div>
+  </div>
+</div>
+
+<div id="keybind-modal">
+  <div id="keybind-panel">
+    <h2>CONTROLES</h2>
+    <div id="keybind-rows"></div>
+    <div id="keybind-conflict"></div>
+    <button id="keybind-close">CERRAR</button>
+  </div>
+</div>
+
+<div id="overlay"></div>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────────
+const COLS = 10, ROWS = 20, BLOCK = 30;
+
+const ACTIONS = [
+  { id: 'left',     label: 'Mover izq.' },
+  { id: 'right',    label: 'Mover der.' },
+  { id: 'rotate',   label: 'Rotar'      },
+  { id: 'softDrop', label: 'Bajar'      },
+  { id: 'hardDrop', label: 'Caer'       },
+  { id: 'hold',     label: 'Guardar'    },
+  { id: 'pause',    label: 'Pausa'      },
+];
+
+const DEFAULT_BINDINGS = {
+  left: 'ArrowLeft', right: 'ArrowRight', rotate: 'ArrowUp',
+  softDrop: 'ArrowDown', hardDrop: ' ', hold: 'c', pause: 'p',
+};
+
+const COLORS = [
+  null,
+  '#00f0f0', '#0000f0', '#f0a000', '#f0f000',
+  '#00f000', '#a000f0', '#f00000',
+];
+
+const SHAPES = [
+  null,
+  [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+  [[1,0,0],[1,1,1],[0,0,0]],
+  [[0,0,1],[1,1,1],[0,0,0]],
+  [[1,1],[1,1]],
+  [[0,1,1],[1,1,0],[0,0,0]],
+  [[0,1,0],[1,1,1],[0,0,0]],
+  [[1,1,0],[0,1,1],[0,0,0]],
+];
+
+const CHAPTERS = [
+  {
+    title: 'El Despertar',
+    narrative: 'Los bloques caen por primera vez.\nDemuestra que puedes ordenar el caos.',
+    objectiveText: 'Limpia 5 líneas',
+    challenge: { type: 'lines', target: 5 },
+    speed: 800,
+  },
+  {
+    title: 'Contrarreloj',
+    narrative: 'El tiempo no espera.\nLimpia 10 líneas antes de que se acabe.',
+    objectiveText: 'Limpia 10 líneas en 60 seg',
+    challenge: { type: 'lines_timed', target: 10, timeLimit: 60 },
+    speed: 700,
+  },
+  {
+    title: 'El Caos',
+    narrative: 'El tablero ya está desordenado.\nAlguien dejó este lío. Solo tú puedes arreglarlo.',
+    objectiveText: 'Limpia 10 líneas (tablero pre-relleno)',
+    challenge: { type: 'lines', target: 10 },
+    speed: 650,
+    prefilled: 10,
+  },
+  {
+    title: 'La Tormenta',
+    narrative: 'Las piezas caen sin descanso.\nSobrevive 90 segundos sin perder.',
+    objectiveText: 'Sobrevive 90 segundos',
+    challenge: { type: 'survive', timeLimit: 90 },
+    speed: 180,
+  },
+  {
+    title: 'El Maestro',
+    narrative: 'El conocimiento no basta.\nDemuestra que dominas el tablero.',
+    objectiveText: 'Alcanza 3000 puntos',
+    challenge: { type: 'score', target: 3000 },
+    speed: 600,
+  },
+  {
+    title: 'Sin Red',
+    narrative: 'Las medias tintas no sirven aquí.\nSolo cuenta borrar cuatro líneas de golpe.',
+    objectiveText: 'Consigue 3 Tetris (4 líneas de golpe)',
+    challenge: { type: 'tetris', target: 3 },
+    speed: 650,
+  },
+];
+
+// ─── Canvas refs ─────────────────────────────────────────────────────────────
+const board     = document.getElementById('board');
+const ctx       = board.getContext('2d');
+const nextCanvas = document.getElementById('next-canvas');
+const nCtx      = nextCanvas.getContext('2d');
+const holdCanvas = document.getElementById('hold-canvas');
+const hCtx      = holdCanvas.getContext('2d');
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let bindings = { ...DEFAULT_BINDINGS };
+
+let grid, piece, nextPiece, holdPiece, canHold;
+let score, level, lines, paused, gameOver, dropInterval, lastTime, animFrame;
+
+let gameMode = 'free';       // 'free' | 'story'
+let currentChapter = 0;
+let challengeState = {};     // { tetrisCount, startTs, elapsed }
+let storyProgress = JSON.parse(localStorage.getItem('tetrisStory') || '[]');
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function keyLabel(k) {
+  const map = { ' ': 'Espacio', ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Escape: 'Esc', Enter: 'Enter' };
+  return map[k] ?? (k.length === 1 ? k.toUpperCase() : k);
+}
+
+function saveProgress() {
+  localStorage.setItem('tetrisStory', JSON.stringify(storyProgress));
+}
+
+// ─── Grid ────────────────────────────────────────────────────────────────────
+function createGrid() {
+  return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+}
+
+function buildPrefilledGrid(filledRows) {
+  const g = createGrid();
+  for (let r = ROWS - 1; r >= ROWS - filledRows; r--) {
+    // Random row with one gap
+    const gap = Math.floor(Math.random() * COLS);
+    for (let c = 0; c < COLS; c++) {
+      g[r][c] = c === gap ? 0 : Math.floor(Math.random() * 7) + 1;
+    }
+  }
+  return g;
+}
+
+// ─── Pieces ──────────────────────────────────────────────────────────────────
+function randomPiece() {
+  const type = Math.floor(Math.random() * 7) + 1;
+  const shape = SHAPES[type].map(row => [...row]);
+  return { type, shape, x: Math.floor((COLS - shape[0].length) / 2), y: 0 };
+}
+
+function rotate(shape) {
+  const N = shape.length, M = shape[0].length;
+  const result = Array.from({ length: M }, () => Array(N).fill(0));
+  for (let r = 0; r < N; r++)
+    for (let c = 0; c < M; c++)
+      result[c][N - 1 - r] = shape[r][c];
+  return result;
+}
+
+function collides(p, g, dx = 0, dy = 0, shape = p.shape) {
+  for (let r = 0; r < shape.length; r++)
+    for (let c = 0; c < shape[r].length; c++) {
+      if (!shape[r][c]) continue;
+      const nx = p.x + c + dx, ny = p.y + r + dy;
+      if (nx < 0 || nx >= COLS || ny >= ROWS) return true;
+      if (ny >= 0 && g[ny][nx]) return true;
+    }
+  return false;
+}
+
+// ─── Game logic ──────────────────────────────────────────────────────────────
+function lock() {
+  for (let r = 0; r < piece.shape.length; r++)
+    for (let c = 0; c < piece.shape[r].length; c++) {
+      if (!piece.shape[r][c]) continue;
+      const ny = piece.y + r;
+      if (ny < 0) { endGame(); return; }
+      grid[ny][piece.x + c] = piece.type;
+    }
+  clearLines();
+  piece = nextPiece;
+  nextPiece = randomPiece();
+  drawNext();
+  canHold = true;
+  document.getElementById('hold-box').classList.remove('blocked');
+  if (collides(piece, grid)) endGame();
+}
+
+function clearLines() {
+  let cleared = 0;
+  for (let r = ROWS - 1; r >= 0; r--) {
+    if (grid[r].every(v => v !== 0)) {
+      grid.splice(r, 1);
+      grid.unshift(Array(COLS).fill(0));
+      cleared++; r++;
+    }
+  }
+  if (cleared) {
+    const pts = [0, 100, 300, 500, 800];
+    score += (pts[cleared] || 800) * level;
+    lines += cleared;
+    level = Math.floor(lines / 10) + 1;
+    if (gameMode === 'free') dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    updateUI();
+    if (gameMode === 'story') checkChallenge(cleared);
+  } else if (gameMode === 'story') {
+    checkChallenge(0);
+  }
+}
+
+function checkChallenge(clearedNow) {
+  const ch = CHAPTERS[currentChapter].challenge;
+
+  if (ch.type === 'lines') {
+    const pct = Math.min(lines / ch.target, 1);
+    updateChallengeUI(`${lines} / ${ch.target}`, pct);
+    if (lines >= ch.target) chapterComplete();
+  }
+  else if (ch.type === 'lines_timed') {
+    const pct = Math.min(lines / ch.target, 1);
+    updateChallengeUI(`${lines} / ${ch.target}`, pct);
+    if (lines >= ch.target) chapterComplete();
+  }
+  else if (ch.type === 'score') {
+    const pct = Math.min(score / ch.target, 1);
+    updateChallengeUI(`${score} / ${ch.target}`, pct);
+    if (score >= ch.target) chapterComplete();
+  }
+  else if (ch.type === 'tetris') {
+    if (clearedNow === 4) challengeState.tetrisCount++;
+    const pct = Math.min(challengeState.tetrisCount / ch.target, 1);
+    updateChallengeUI(`${challengeState.tetrisCount} / ${ch.target}`, pct);
+    if (challengeState.tetrisCount >= ch.target) chapterComplete();
+  }
+}
+
+function updateChallengeUI(text, pct) {
+  document.getElementById('challenge-progress-text').textContent = text;
+  document.getElementById('challenge-progress-fill').style.width = (pct * 100) + '%';
+}
+
+// ─── UI update ───────────────────────────────────────────────────────────────
+function updateUI() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('level').textContent = level;
+  document.getElementById('lines').textContent = lines;
+}
+
+function renderControls() {
+  document.getElementById('controls-table').innerHTML = ACTIONS.map(a =>
+    `<tr><td>${keyLabel(bindings[a.id])}</td><td>${a.label}</td></tr>`
+  ).join('');
+}
+
+// ─── Drawing ─────────────────────────────────────────────────────────────────
+function drawBlock(context, x, y, type, alpha = 1) {
+  if (!type) return;
+  context.globalAlpha = alpha;
+  context.fillStyle = COLORS[type];
+  context.fillRect(x * BLOCK + 1, y * BLOCK + 1, BLOCK - 2, BLOCK - 2);
+  context.fillStyle = 'rgba(255,255,255,0.3)';
+  context.fillRect(x * BLOCK + 1, y * BLOCK + 1, BLOCK - 2, 4);
+  context.fillRect(x * BLOCK + 1, y * BLOCK + 1, 4, BLOCK - 2);
+  context.fillStyle = 'rgba(0,0,0,0.2)';
+  context.fillRect(x * BLOCK + 1, y * BLOCK + BLOCK - 5, BLOCK - 2, 4);
+  context.globalAlpha = 1;
+}
+
+function getGhost() {
+  let dy = 0;
+  while (!collides(piece, grid, 0, dy + 1)) dy++;
+  return { ...piece, y: piece.y + dy };
+}
+
+function draw() {
+  ctx.clearRect(0, 0, board.width, board.height);
+  ctx.strokeStyle = '#ffffff08';
+  ctx.lineWidth = 1;
+  for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r*BLOCK); ctx.lineTo(COLS*BLOCK, r*BLOCK); ctx.stroke(); }
+  for (let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c*BLOCK, 0); ctx.lineTo(c*BLOCK, ROWS*BLOCK); ctx.stroke(); }
+
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      drawBlock(ctx, c, r, grid[r][c]);
+
+  const ghost = getGhost();
+  for (let r = 0; r < ghost.shape.length; r++)
+    for (let c = 0; c < ghost.shape[r].length; c++)
+      if (ghost.shape[r][c]) drawBlock(ctx, ghost.x+c, ghost.y+r, piece.type, 0.2);
+
+  for (let r = 0; r < piece.shape.length; r++)
+    for (let c = 0; c < piece.shape[r].length; c++)
+      if (piece.shape[r][c]) drawBlock(ctx, piece.x+c, piece.y+r, piece.type);
+}
+
+function drawPieceInCanvas(context, p) {
+  context.clearRect(0, 0, 120, 120);
+  if (!p) return;
+  const s = p.shape, bw = 24;
+  const ox = Math.floor((5 - s[0].length) / 2);
+  const oy = Math.floor((5 - s.length) / 2);
+  for (let r = 0; r < s.length; r++)
+    for (let c = 0; c < s[r].length; c++)
+      if (s[r][c]) {
+        context.fillStyle = COLORS[p.type];
+        context.fillRect((ox+c)*bw+1, (oy+r)*bw+1, bw-2, bw-2);
+        context.fillStyle = 'rgba(255,255,255,0.3)';
+        context.fillRect((ox+c)*bw+1, (oy+r)*bw+1, bw-2, 3);
+        context.fillRect((ox+c)*bw+1, (oy+r)*bw+1, 3, bw-2);
+      }
+}
+
+function drawNext() { drawPieceInCanvas(nCtx, nextPiece); }
+
+// ─── Hold ────────────────────────────────────────────────────────────────────
+function holdCurrentPiece() {
+  if (!canHold) return;
+  canHold = false;
+  document.getElementById('hold-box').classList.add('blocked');
+  const savedType = piece.type;
+  if (holdPiece) {
+    piece = { ...holdPiece, x: Math.floor((COLS - holdPiece.shape[0].length) / 2), y: 0 };
+  } else {
+    piece = nextPiece;
+    nextPiece = randomPiece();
+    drawPieceInCanvas(nCtx, nextPiece);
+  }
+  holdPiece = { type: savedType, shape: SHAPES[savedType].map(row => [...row]) };
+  drawPieceInCanvas(hCtx, holdPiece);
+  draw();
+}
+
+// ─── Game loop ───────────────────────────────────────────────────────────────
+function gameLoop(ts) {
+  if (!lastTime) lastTime = ts;
+  const delta = ts - lastTime;
+
+  if (!paused && delta >= dropInterval) {
+    lastTime = ts;
+    if (!collides(piece, grid, 0, 1)) piece.y++;
+    else lock();
+  }
+
+  // Story mode timers
+  if (gameMode === 'story' && !paused && !gameOver) {
+    const ch = CHAPTERS[currentChapter].challenge;
+    const elapsed = (ts - challengeState.startTs) / 1000;
+
+    if (ch.type === 'survive') {
+      const remaining = Math.max(0, ch.timeLimit - elapsed);
+      document.getElementById('challenge-timer').textContent = fmtTime(remaining);
+      const pct = elapsed / ch.timeLimit;
+      updateChallengeUI(fmtTime(remaining), Math.min(pct, 1));
+      if (elapsed >= ch.timeLimit) { chapterComplete(); return; }
+    } else if (ch.type === 'lines_timed') {
+      const remaining = Math.max(0, ch.timeLimit - elapsed);
+      document.getElementById('challenge-timer').textContent = fmtTime(remaining);
+      if (elapsed >= ch.timeLimit) { chapterFailed(); return; }
+    }
+  }
+
+  draw();
+  if (!gameOver) animFrame = requestAnimationFrame(gameLoop);
+}
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+// ─── Start / End ─────────────────────────────────────────────────────────────
+function resetGameState(prefilledRows = 0) {
+  grid = prefilledRows ? buildPrefilledGrid(prefilledRows) : createGrid();
+  score = 0; level = 1; lines = 0;
+  paused = false; gameOver = false; lastTime = 0;
+  holdPiece = null; canHold = true;
+  piece = randomPiece();
+  nextPiece = randomPiece();
+  updateUI();
+  drawNext();
+  drawPieceInCanvas(hCtx, null);
+  document.getElementById('hold-box').classList.remove('blocked');
+}
+
+function startFreeGame() {
+  gameMode = 'free';
+  dropInterval = 1000;
+  document.getElementById('challenge-box').classList.remove('visible');
+  document.getElementById('level-box').style.display = '';
+  resetGameState();
+  hideOverlay();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function startChapter(idx) {
+  gameMode = 'story';
+  currentChapter = idx;
+  const ch = CHAPTERS[idx];
+  dropInterval = ch.speed;
+  challengeState = { tetrisCount: 0, startTs: performance.now() };
+
+  document.getElementById('level-box').style.display = 'none';
+  const box = document.getElementById('challenge-box');
+  box.classList.add('visible');
+  document.getElementById('challenge-title').textContent = ch.title;
+  document.getElementById('challenge-obj').textContent = ch.objectiveText;
+  document.getElementById('challenge-timer').textContent = '';
+  updateChallengeUI('0', 0);
+
+  resetGameState(ch.prefilled || 0);
+  // reset startTs after grid build
+  challengeState.startTs = performance.now();
+  hideOverlay();
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function endGame() {
+  gameOver = true;
+  if (gameMode === 'story') {
+    chapterFailed();
+  } else {
+    showOverlay(`
+      <h2>GAME OVER</h2>
+      <div id="final-score">Puntuación: ${score}</div>
+      <p>Nivel ${level} &nbsp;|&nbsp; Líneas: ${lines}</p>
+      <button class="ov-btn" id="btn-retry">JUGAR DE NUEVO</button>
+      <button class="ov-btn secondary" id="btn-menu">MENÚ</button>
+    `, el => {
+      el.querySelector('#btn-retry').onclick = startFreeGame;
+      el.querySelector('#btn-menu').onclick = showMainMenu;
+    });
+  }
+}
+
+function chapterComplete() {
+  gameOver = true;
+  storyProgress[currentChapter] = true;
+  saveProgress();
+  const next = currentChapter + 1;
+  const hasNext = next < CHAPTERS.length;
+  showOverlay(`
+    <div class="result-icon">⭐</div>
+    <h2>¡COMPLETADO!</h2>
+    <p style="color:#f0a000;font-size:0.8rem;letter-spacing:0.2em">${CHAPTERS[currentChapter].title.toUpperCase()}</p>
+    <div class="result-stats">
+      Puntos: <span>${score}</span><br>
+      Líneas: <span>${lines}</span>
+    </div>
+    ${hasNext ? `<button class="ov-btn" id="btn-next">SIGUIENTE CAPÍTULO</button>` : '<p style="color:#f0a000">¡Has completado la historia!</p>'}
+    <button class="ov-btn secondary" id="btn-chapters">VER CAPÍTULOS</button>
+  `, el => {
+    if (hasNext) el.querySelector('#btn-next').onclick = () => showChapterIntro(next);
+    el.querySelector('#btn-chapters').onclick = showChapterSelect;
+  });
+}
+
+function chapterFailed() {
+  gameOver = true;
+  showOverlay(`
+    <div class="result-icon">💀</div>
+    <h2>FALLIDO</h2>
+    <p style="color:#888;font-size:0.8rem;letter-spacing:0.2em">${CHAPTERS[currentChapter].title.toUpperCase()}</p>
+    <div class="result-stats">
+      Puntos: <span>${score}</span><br>
+      Líneas: <span>${lines}</span>
+    </div>
+    <button class="ov-btn" id="btn-retry">REINTENTAR</button>
+    <button class="ov-btn secondary" id="btn-chapters">VER CAPÍTULOS</button>
+  `, el => {
+    el.querySelector('#btn-retry').onclick = () => showChapterIntro(currentChapter);
+    el.querySelector('#btn-chapters').onclick = showChapterSelect;
+  });
+}
+
+// ─── Overlay screens ─────────────────────────────────────────────────────────
+function showOverlay(html, onReady) {
+  const el = document.getElementById('overlay');
+  el.innerHTML = html;
+  el.style.display = 'flex';
+  if (onReady) onReady(el);
+}
+
+function hideOverlay() {
+  document.getElementById('overlay').style.display = 'none';
+}
+
+function showMainMenu() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  gameOver = true;
+  showOverlay(`
+    <h2>TETRIS</h2>
+    <p>Elige tu modo de juego</p>
+    <button class="ov-btn" id="btn-free">MODO LIBRE</button>
+    <button class="ov-btn secondary" id="btn-story">MODO HISTORIA</button>
+  `, el => {
+    el.querySelector('#btn-free').onclick = startFreeGame;
+    el.querySelector('#btn-story').onclick = showChapterSelect;
+  });
+}
+
+function showChapterSelect() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  gameOver = true;
+
+  const cards = CHAPTERS.map((ch, i) => {
+    const done = !!storyProgress[i];
+    const locked = i > 0 && !storyProgress[i - 1];
+    const cls = locked ? 'locked' : done ? 'completed' : '';
+    const badge = done ? '✓' : locked ? '🔒' : `${i + 1}`;
+    const numColor = done ? '✓' : `${i + 1}`;
+    return `
+      <div class="chapter-card ${cls}" data-idx="${i}">
+        <div class="chapter-num">${numColor}</div>
+        <div class="chapter-info">
+          <div class="ch-title">${ch.title}</div>
+          <div class="ch-obj">${ch.objectiveText}</div>
+        </div>
+        <div class="chapter-badge">${done ? '⭐' : locked ? '🔒' : ''}</div>
+      </div>
+    `;
+  }).join('');
+
+  showOverlay(`
+    <h2 style="font-size:1.5rem">MODO HISTORIA</h2>
+    <div id="chapter-list">${cards}</div>
+    <button class="ov-btn secondary" id="btn-back">← VOLVER</button>
+  `, el => {
+    el.querySelector('#btn-back').onclick = showMainMenu;
+    el.querySelectorAll('.chapter-card:not(.locked)').forEach(card => {
+      card.addEventListener('click', () => showChapterIntro(+card.dataset.idx));
+    });
+  });
+}
+
+function showChapterIntro(idx) {
+  const ch = CHAPTERS[idx];
+  const narrativeHtml = ch.narrative.replace(/\n/g, '<br>');
+  showOverlay(`
+    <div id="chapter-intro-num">Capítulo ${idx + 1} de ${CHAPTERS.length}</div>
+    <div id="chapter-intro-title">${ch.title}</div>
+    <p id="chapter-intro-narrative">${narrativeHtml}</p>
+    <div class="objective-badge">🎯 ${ch.objectiveText}</div>
+    <button class="ov-btn" id="btn-play">JUGAR</button>
+    <button class="ov-btn secondary" id="btn-back">← CAPÍTULOS</button>
+  `, el => {
+    el.querySelector('#btn-play').onclick = () => startChapter(idx);
+    el.querySelector('#btn-back').onclick = showChapterSelect;
+  });
+}
+
+// ─── Keyboard ────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (gameOver) return;
+  const k = e.key;
+  const is = a => k === bindings[a] || k === bindings[a].toUpperCase();
+
+  if (is('pause')) {
+    paused = !paused;
+    if (!paused) { lastTime = 0; animFrame = requestAnimationFrame(gameLoop); }
+    return;
+  }
+  if (paused) return;
+
+  if      (is('left'))     { if (!collides(piece, grid, -1, 0)) piece.x--; }
+  else if (is('right'))    { if (!collides(piece, grid,  1, 0)) piece.x++; }
+  else if (is('softDrop')) {
+    if (!collides(piece, grid, 0, 1)) piece.y++; else lock();
+    lastTime = performance.now();
+  }
+  else if (is('rotate')) {
+    const rot = rotate(piece.shape);
+    for (const kick of [0, 1, -1, 2, -2]) {
+      if (!collides(piece, grid, kick, 0, rot)) { piece.shape = rot; piece.x += kick; break; }
+    }
+  }
+  else if (k === bindings.hardDrop) {
+    e.preventDefault();
+    while (!collides(piece, grid, 0, 1)) piece.y++;
+    lock(); lastTime = performance.now();
+  }
+  else if (is('hold')) { holdCurrentPiece(); }
+  else return;
+
+  draw();
+});
+
+// ─── Keybind modal ───────────────────────────────────────────────────────────
+let listeningAction = null;
+
+function openKeybindModal() {
+  if (!gameOver) paused = true;
+  renderKeybindModal();
+  document.getElementById('keybind-modal').classList.add('open');
+}
+
+function closeKeybindModal() {
+  listeningAction = null;
+  document.getElementById('keybind-modal').classList.remove('open');
+  document.getElementById('keybind-conflict').textContent = '';
+  renderControls();
+  if (!gameOver) { paused = false; lastTime = 0; animFrame = requestAnimationFrame(gameLoop); }
+}
+
+function renderKeybindModal() {
+  const container = document.getElementById('keybind-rows');
+  container.innerHTML = ACTIONS.map(a => `
+    <div class="keybind-row">
+      <span class="action-name">${a.label}</span>
+      <button class="keybind-btn" data-action="${a.id}">${keyLabel(bindings[a.id])}</button>
+    </div>
+  `).join('');
+  container.querySelectorAll('.keybind-btn').forEach(btn =>
+    btn.addEventListener('click', () => startListening(btn.dataset.action))
+  );
+}
+
+function startListening(actionId) {
+  listeningAction = actionId;
+  document.getElementById('keybind-conflict').textContent = '';
+  document.querySelectorAll('.keybind-btn').forEach(b => {
+    b.classList.toggle('listening', b.dataset.action === actionId);
+    b.textContent = b.dataset.action === actionId ? '...' : keyLabel(bindings[b.dataset.action]);
+  });
+}
+
+function cancelListening() { listeningAction = null; renderKeybindModal(); }
+
+document.addEventListener('keydown', e => {
+  if (!listeningAction) return;
+  e.preventDefault();
+  const k = e.key;
+  if (k === 'Escape') { cancelListening(); return; }
+  const conflict = ACTIONS.find(a => a.id !== listeningAction && bindings[a.id] === k);
+  if (conflict) {
+    document.getElementById('keybind-conflict').textContent = `"${keyLabel(k)}" ya está en "${conflict.label}"`;
+    cancelListening(); return;
+  }
+  bindings[listeningAction] = k;
+  listeningAction = null;
+  document.getElementById('keybind-conflict').textContent = '';
+  renderKeybindModal();
+});
+
+document.getElementById('edit-controls-btn').addEventListener('click', openKeybindModal);
+document.getElementById('keybind-close').addEventListener('click', closeKeybindModal);
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+renderControls();
+showMainMenu();
+</script>
+</body>
+</html>
