@@ -331,6 +331,72 @@
       line-height: 2;
     }
     .result-stats span { color: #aaa; }
+
+    /* Profile screens */
+    #profile-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 300px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    #profile-list::-webkit-scrollbar { width: 4px; }
+    #profile-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #16213e;
+      border: 1px solid #222;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .profile-card:hover { border-color: #e94560; background: #1e2d4e; }
+    .profile-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #e94560;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: bold; color: white; flex-shrink: 0;
+    }
+    .profile-info { flex: 1; }
+    .profile-info .p-name { font-size: 0.9rem; color: #eee; }
+    .profile-info .p-stats { font-size: 0.65rem; color: #555; margin-top: 2px; }
+
+    .profile-delete {
+      background: none; border: none; color: #333; font-size: 1rem;
+      cursor: pointer; padding: 4px; transition: color 0.15s;
+    }
+    .profile-delete:hover { color: #e94560; }
+
+    .name-input {
+      padding: 10px 14px;
+      background: #0a0a1a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #eee;
+      font-family: 'Courier New', monospace;
+      font-size: 1rem;
+      width: 240px;
+      text-align: center;
+      letter-spacing: 0.1em;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .name-input:focus { border-color: #e94560; }
+    .name-input::placeholder { color: #444; }
+    .input-error { font-size: 0.7rem; color: #e94560; min-height: 1em; }
+
+    /* Active player indicator in side panel */
+    #player-box { cursor: pointer; transition: border-color 0.15s; }
+    #player-box:hover { border-color: #e94560; }
+    #player-box h3 { margin-bottom: 4px; }
+    #player-name-display { font-size: 1rem; color: #eee; font-weight: bold; }
+    #player-best { font-size: 0.65rem; color: #555; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -342,6 +408,11 @@
   </div>
 
   <div id="side-panel">
+    <div class="panel-box" id="player-box" title="Cambiar jugador">
+      <h3>Jugador</h3>
+      <div id="player-name-display">—</div>
+      <div id="player-best"></div>
+    </div>
     <div class="panel-box">
       <h3>Puntos</h3>
       <div class="value" id="score">0</div>
@@ -485,19 +556,51 @@ let bindings = { ...DEFAULT_BINDINGS };
 let grid, piece, nextPiece, holdPiece, canHold;
 let score, level, lines, paused, gameOver, dropInterval, lastTime, animFrame;
 
-let gameMode = 'free';       // 'free' | 'story'
+let gameMode = 'free';
 let currentChapter = 0;
-let challengeState = {};     // { tetrisCount, startTs, elapsed }
-let storyProgress = JSON.parse(localStorage.getItem('tetrisStory') || '[]');
+let challengeState = {};
+
+// ─── Profile system ──────────────────────────────────────────────────────────
+// { name: { storyProgress: [], bestScore: 0 }, ... }
+let profiles = JSON.parse(localStorage.getItem('tetrisProfiles') || '{}');
+let activeProfile = localStorage.getItem('tetrisActiveProfile') || null;
+
+function currentProfileData() {
+  if (!activeProfile || !profiles[activeProfile]) return { storyProgress: [], bestScore: 0 };
+  return profiles[activeProfile];
+}
+
+function saveProfiles() {
+  localStorage.setItem('tetrisProfiles', JSON.stringify(profiles));
+}
+
+function setActiveProfile(name) {
+  activeProfile = name;
+  localStorage.setItem('tetrisActiveProfile', name);
+  const data = currentProfileData();
+  document.getElementById('player-name-display').textContent = name;
+  document.getElementById('player-best').textContent = data.bestScore > 0 ? `Récord: ${data.bestScore}` : '';
+}
+
+function saveProgress() {
+  if (!activeProfile) return;
+  profiles[activeProfile].storyProgress = storyProgress;
+  saveProfiles();
+}
+
+function updateBestScore(s) {
+  if (!activeProfile) return;
+  if (s > (profiles[activeProfile].bestScore || 0)) {
+    profiles[activeProfile].bestScore = s;
+    saveProfiles();
+    document.getElementById('player-best').textContent = `Récord: ${s}`;
+  }
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function keyLabel(k) {
   const map = { ' ': 'Espacio', ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Escape: 'Esc', Enter: 'Enter' };
   return map[k] ?? (k.length === 1 ? k.toUpperCase() : k);
-}
-
-function saveProgress() {
-  localStorage.setItem('tetrisStory', JSON.stringify(storyProgress));
 }
 
 // ─── Grid ────────────────────────────────────────────────────────────────────
@@ -795,6 +898,7 @@ function startChapter(idx) {
 
 function endGame() {
   gameOver = true;
+  updateBestScore(score);
   if (gameMode === 'story') {
     chapterFailed();
   } else {
@@ -813,6 +917,7 @@ function endGame() {
 
 function chapterComplete() {
   gameOver = true;
+  updateBestScore(score);
   storyProgress[currentChapter] = true;
   saveProgress();
   const next = currentChapter + 1;
@@ -866,15 +971,110 @@ function hideOverlay() {
 function showMainMenu() {
   if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
   gameOver = true;
+  const data = currentProfileData();
+  const chapsDone = data.storyProgress.filter(Boolean).length;
   showOverlay(`
     <h2>TETRIS</h2>
-    <p>Elige tu modo de juego</p>
+    <p style="color:#e94560;font-size:0.8rem;letter-spacing:0.15em">👤 ${activeProfile}</p>
     <button class="ov-btn" id="btn-free">MODO LIBRE</button>
-    <button class="ov-btn secondary" id="btn-story">MODO HISTORIA</button>
+    <button class="ov-btn secondary" id="btn-story">MODO HISTORIA ${chapsDone > 0 ? `(${chapsDone}/${CHAPTERS.length})` : ''}</button>
+    <button class="ov-btn secondary" id="btn-change">CAMBIAR JUGADOR</button>
   `, el => {
     el.querySelector('#btn-free').onclick = startFreeGame;
     el.querySelector('#btn-story').onclick = showChapterSelect;
+    el.querySelector('#btn-change').onclick = showProfileSelect;
   });
+}
+
+// ─── Profile screens ─────────────────────────────────────────────────────────
+function showProfileSelect() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  gameOver = true;
+
+  const names = Object.keys(profiles);
+  const cards = names.length === 0
+    ? `<p style="color:#555;font-size:0.8rem">No hay perfiles aún.</p>`
+    : names.map(name => {
+        const d = profiles[name];
+        const done = (d.storyProgress || []).filter(Boolean).length;
+        const initial = name[0].toUpperCase();
+        return `
+          <div class="profile-card" data-name="${name}">
+            <div class="profile-avatar">${initial}</div>
+            <div class="profile-info">
+              <div class="p-name">${name}</div>
+              <div class="p-stats">Historia: ${done}/${CHAPTERS.length} &nbsp;·&nbsp; Récord: ${d.bestScore || 0}</div>
+            </div>
+            <button class="profile-delete" data-del="${name}" title="Eliminar">✕</button>
+          </div>
+        `;
+      }).join('');
+
+  showOverlay(`
+    <h2 style="font-size:1.5rem">JUGADORES</h2>
+    <div id="profile-list">${cards}</div>
+    <button class="ov-btn" id="btn-new-profile">+ NUEVO JUGADOR</button>
+    ${activeProfile ? `<button class="ov-btn secondary" id="btn-back">← VOLVER</button>` : ''}
+  `, el => {
+    el.querySelectorAll('.profile-card').forEach(card => {
+      card.addEventListener('click', e => {
+        if (e.target.closest('.profile-delete')) return;
+        selectProfile(card.dataset.name);
+      });
+    });
+    el.querySelectorAll('.profile-delete').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        deleteProfile(btn.dataset.del);
+      });
+    });
+    el.querySelector('#btn-new-profile').onclick = showNewProfile;
+    if (activeProfile) el.querySelector('#btn-back').onclick = showMainMenu;
+  });
+}
+
+function showNewProfile() {
+  showOverlay(`
+    <h2 style="font-size:1.5rem">NUEVO JUGADOR</h2>
+    <p>¿Cómo te llamas?</p>
+    <input class="name-input" id="profile-name-input" maxlength="16" placeholder="Tu nombre" autocomplete="off" />
+    <div class="input-error" id="profile-name-error"></div>
+    <button class="ov-btn" id="btn-create">CREAR</button>
+    <button class="ov-btn secondary" id="btn-back">← VOLVER</button>
+  `, el => {
+    const input = el.querySelector('#profile-name-input');
+    const error = el.querySelector('#profile-name-error');
+    input.focus();
+
+    const create = () => {
+      const name = input.value.trim();
+      if (!name) { error.textContent = 'Escribe un nombre.'; return; }
+      if (profiles[name]) { error.textContent = 'Ya existe ese nombre.'; return; }
+      profiles[name] = { storyProgress: [], bestScore: 0 };
+      saveProfiles();
+      selectProfile(name);
+    };
+
+    el.querySelector('#btn-create').onclick = create;
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') create(); });
+    el.querySelector('#btn-back').onclick = showProfileSelect;
+  });
+}
+
+function selectProfile(name) {
+  setActiveProfile(name);
+  storyProgress = currentProfileData().storyProgress.slice();
+  showMainMenu();
+}
+
+function deleteProfile(name) {
+  delete profiles[name];
+  saveProfiles();
+  if (activeProfile === name) {
+    activeProfile = null;
+    localStorage.removeItem('tetrisActiveProfile');
+  }
+  showProfileSelect();
 }
 
 function showChapterSelect() {
@@ -1024,8 +1224,21 @@ document.getElementById('edit-controls-btn').addEventListener('click', openKeybi
 document.getElementById('keybind-close').addEventListener('click', closeKeybindModal);
 
 // ─── Init ────────────────────────────────────────────────────────────────────
+document.getElementById('player-box').addEventListener('click', () => {
+  if (!gameOver) paused = true;
+  showProfileSelect();
+});
+
 renderControls();
-showMainMenu();
+
+if (activeProfile && profiles[activeProfile]) {
+  storyProgress = currentProfileData().storyProgress.slice();
+  setActiveProfile(activeProfile);
+  showMainMenu();
+} else {
+  activeProfile = null;
+  showProfileSelect();
+}
 </script>
 </body>
 </html>
