@@ -39,6 +39,15 @@
       background: #0a0a1a;
     }
 
+    #music-btn {
+      padding: 5px 14px; background: transparent; color: #555;
+      border: 1px solid #333; border-radius: 4px; font-size: 0.7rem;
+      font-family: 'Courier New', monospace; letter-spacing: 0.1em;
+      cursor: pointer; transition: color 0.2s, border-color 0.2s;
+    }
+    #music-btn:hover { color: #aaa; border-color: #666; }
+    #music-btn.muted { color: #e94560; border-color: #e94560; }
+
     #side-panel { display: flex; flex-direction: column; gap: 16px; min-width: 140px; }
 
     .panel-box {
@@ -238,6 +247,7 @@
   <div id="board-wrapper">
     <h1>TETRIS</h1>
     <canvas id="board" width="300" height="600"></canvas>
+    <button id="music-btn">🔊 MÚSICA</button>
   </div>
   <div id="side-panel">
     <div class="panel-box" id="player-box" title="Cambiar jugador">
@@ -294,6 +304,161 @@
 <div id="overlay"></div>
 
 <script>
+// ─── Audio ───────────────────────────────────────────────────────────────────
+let audioCtx = null;
+let musicMuted = false;
+let loopTimeout = null;
+let musicStarted = false;
+
+function ensureAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playTone(freq, startTime, duration, vol = 0.2, type = 'square') {
+  if (!audioCtx || freq === 0) return;
+  const osc = audioCtx.createOscillator();
+  const env = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  env.gain.setValueAtTime(vol, startTime);
+  env.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.88);
+  osc.connect(env);
+  env.connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+}
+
+// Note table
+const N = {
+  C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196.00,A3:220.00,B3:246.94,
+  C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392.00,A4:440.00,B4:493.88,
+  C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880.00,
+  R:0,
+};
+
+const BPM = 126;
+const B = 60 / BPM;
+
+// Himno del Málaga CF — chiptune transcription (C major, march)
+// [frequency, beats]
+const MELODY = [
+  // Intro — fanfarria
+  [N.G4,0.5],[N.G4,0.25],[N.G4,0.25],[N.E4,0.5],[N.F4,0.5],
+  [N.G4,1],[N.C5,1],[N.R,1],
+  // Frase A
+  [N.C5,0.5],[N.D5,0.5],[N.E5,0.5],[N.D5,0.5],
+  [N.C5,1],[N.G4,0.5],[N.A4,0.5],
+  [N.B4,0.5],[N.C5,0.5],[N.D5,0.5],[N.C5,0.5],
+  [N.G4,2],[N.R,0.5],
+  // Frase B
+  [N.E5,0.5],[N.D5,0.5],[N.C5,0.5],[N.B4,0.5],
+  [N.A4,1],[N.F4,0.5],[N.G4,0.5],
+  [N.A4,0.5],[N.B4,0.5],[N.C5,0.5],[N.D5,0.5],
+  [N.C5,2],[N.R,0.5],
+  // Estribillo
+  [N.G5,1],[N.E5,0.5],[N.C5,0.5],
+  [N.D5,1],[N.B4,0.5],[N.G4,0.5],
+  [N.A4,0.5],[N.C5,0.5],[N.E5,0.5],[N.D5,0.5],
+  [N.C5,2],[N.R,0.5],
+  // Variación
+  [N.C5,0.5],[N.B4,0.5],[N.A4,0.5],[N.G4,0.5],
+  [N.F4,1],[N.A4,1],
+  [N.G4,0.5],[N.B4,0.5],[N.D5,0.5],[N.C5,0.5],
+  [N.G4,2],[N.R,1],
+];
+
+// Simple bass: root/fifth every 2 beats, aligned with melody total
+const BASS_PATTERN = [N.C3,N.G3,N.C3,N.G3,N.F3,N.C3,N.G3,N.D3,N.C3,N.G3,N.C3,N.G3];
+
+function scheduleAnthem() {
+  if (!audioCtx || musicMuted) return;
+  const now = audioCtx.currentTime + 0.05;
+
+  // Melody
+  let t = now;
+  MELODY.forEach(([freq, beats]) => {
+    playTone(freq, t, beats * B * 0.85, 0.22, 'square');
+    t += beats * B;
+  });
+  const totalDur = t - now;
+
+  // Bass
+  let bt = now;
+  let bi = 0;
+  while (bt < now + totalDur) {
+    playTone(BASS_PATTERN[bi % BASS_PATTERN.length], bt, B * 1.7, 0.12, 'triangle');
+    bt += B * 2;
+    bi++;
+  }
+
+  loopTimeout = setTimeout(scheduleAnthem, (totalDur - 0.3) * 1000);
+}
+
+function startMusic() {
+  if (!audioCtx || musicMuted || musicStarted) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  musicStarted = true;
+  scheduleAnthem();
+}
+
+function stopMusic() {
+  if (loopTimeout) { clearTimeout(loopTimeout); loopTimeout = null; }
+  musicStarted = false;
+}
+
+function toggleMusic() {
+  ensureAudio();
+  musicMuted = !musicMuted;
+  const btn = document.getElementById('music-btn');
+  if (musicMuted) {
+    stopMusic();
+    btn.textContent = '🔇 MÚSICA';
+    btn.classList.add('muted');
+  } else {
+    btn.textContent = '🔊 MÚSICA';
+    btn.classList.remove('muted');
+    startMusic();
+  }
+}
+
+function tryStartMusic() {
+  if (musicStarted || musicMuted) return;
+  ensureAudio();
+  startMusic();
+}
+
+// SFX
+function sfxLineClear(cleared) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  if (cleared === 4) {
+    // Tetris: mini fanfare ascendente
+    [[N.C5,0],[N.E5,0.08],[N.G5,0.16],[N.C5,0.08],[N.E5,0.24]].forEach(([f,d]) => {
+      playTone(f, t + d, 0.18, 0.35, 'square');
+    });
+  } else {
+    // Barrido hacia arriba
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(280 + cleared * 80, t);
+    osc.frequency.exponentialRampToValueAtTime(560 + cleared * 120, t + 0.14);
+    env.gain.setValueAtTime(0.18, t);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+    osc.connect(env); env.connect(audioCtx.destination);
+    osc.start(t); osc.stop(t + 0.18);
+  }
+}
+
+function sfxGameOver() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  [N.C5,N.B4,N.A4,N.G4,N.F4,N.E4,N.D4,N.C4].forEach((f, i) => {
+    playTone(f, t + i * 0.1, 0.12, 0.25, 'square');
+  });
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 const COLS = 10, ROWS = 20, BLOCK = 30;
 
@@ -487,6 +652,7 @@ let bindings = { ...DEFAULT_BINDINGS };
 let grid, piece, nextPiece, holdPiece, canHold;
 let score, level, lines, paused, gameOver, dropInterval, lastTime, animFrame;
 
+let clearFlash = null; // { alpha, color, ts }
 let gameMode = 'free'; // 'free' | 'story' | 'boss'
 let currentChapter = { diff: 'easy', idx: 0 };
 let challengeState = {};
@@ -660,6 +826,14 @@ function clearLines() {
     if (gameMode === 'free') dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateUI();
 
+    // Visual flash + SFX
+    clearFlash = {
+      alpha: cleared === 4 ? 0.7 : 0.45,
+      color: cleared === 4 ? '#f0d000' : '#ffffff',
+      ts: performance.now(),
+    };
+    sfxLineClear(cleared);
+
     if (gameMode === 'story') checkChallenge(cleared);
     if (gameMode === 'boss')  dealBossDamage(cleared);
   } else if (gameMode === 'story') {
@@ -760,6 +934,13 @@ function draw() {
   for (let r = 0; r < piece.shape.length; r++)
     for (let c = 0; c < piece.shape[r].length; c++)
       if (piece.shape[r][c]) drawBlock(ctx, piece.x+c, piece.y+r, piece.type);
+
+  if (clearFlash && clearFlash.alpha > 0) {
+    ctx.fillStyle = clearFlash.color;
+    ctx.globalAlpha = clearFlash.alpha;
+    ctx.fillRect(0, 0, board.width, board.height);
+    ctx.globalAlpha = 1;
+  }
 }
 
 function drawPieceInCanvas(context, p) {
@@ -803,6 +984,12 @@ function holdCurrentPiece() {
 function gameLoop(ts) {
   if (!lastTime) lastTime = ts;
   const delta = ts - lastTime;
+
+  // Fade line-clear flash
+  if (clearFlash) {
+    clearFlash.alpha = Math.max(0, clearFlash.alpha - 0.06);
+    if (clearFlash.alpha <= 0) clearFlash = null;
+  }
 
   if (!paused && delta >= dropInterval) {
     lastTime = ts;
@@ -948,6 +1135,7 @@ function startBoss(idx) {
 function endGame() {
   gameOver = true;
   updateBestScore(score);
+  sfxGameOver();
   if (gameMode === 'story') {
     chapterFailed();
   } else if (gameMode === 'boss') {
@@ -1071,6 +1259,7 @@ function showOverlay(html, onReady) {
   const el = document.getElementById('overlay');
   el.innerHTML = html;
   el.style.display = 'flex';
+  el.addEventListener('click', tryStartMusic, { once: true });
   if (onReady) onReady(el);
 }
 
@@ -1319,6 +1508,7 @@ function deleteProfile(name) {
 
 // ─── Keyboard ────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
+  tryStartMusic();
   if (gameOver) return;
   const k = e.key;
   const is = a => k === bindings[a] || k === bindings[a].toUpperCase();
@@ -1412,6 +1602,7 @@ document.addEventListener('keydown', e => {
 
 document.getElementById('edit-controls-btn').addEventListener('click', openKeybindModal);
 document.getElementById('keybind-close').addEventListener('click', closeKeybindModal);
+document.getElementById('music-btn').addEventListener('click', () => { toggleMusic(); tryStartMusic(); });
 
 // ─── Init ────────────────────────────────────────────────────────────────────
 document.getElementById('player-box').addEventListener('click', () => {
