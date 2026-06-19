@@ -306,6 +306,7 @@
 <script>
 // ─── Audio ───────────────────────────────────────────────────────────────────
 let audioCtx = null;
+let masterGain = null;
 let musicMuted = false;
 let loopTimeout = null;
 let musicStarted = false;
@@ -313,10 +314,13 @@ let musicStarted = false;
 function ensureAudio() {
   if (audioCtx) return;
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.8;
+  masterGain.connect(audioCtx.destination);
 }
 
 function playTone(freq, startTime, duration, vol = 0.2, type = 'square') {
-  if (!audioCtx || freq === 0) return;
+  if (!audioCtx || freq === 0 || !masterGain) return;
   const osc = audioCtx.createOscillator();
   const env = audioCtx.createGain();
   osc.type = type;
@@ -324,7 +328,7 @@ function playTone(freq, startTime, duration, vol = 0.2, type = 'square') {
   env.gain.setValueAtTime(vol, startTime);
   env.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.88);
   osc.connect(env);
-  env.connect(audioCtx.destination);
+  env.connect(masterGain); // ← through master gain, not directly to destination
   osc.start(startTime);
   osc.stop(startTime + duration);
 }
@@ -412,12 +416,19 @@ function toggleMusic() {
   musicMuted = !musicMuted;
   const btn = document.getElementById('music-btn');
   if (musicMuted) {
+    // Silencio inmediato cortando el masterGain — los osciladores programados
+    // siguen corriendo en el tiempo del AudioContext pero no se oyen
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
     stopMusic();
     btn.textContent = '🔇 MÚSICA';
     btn.classList.add('muted');
   } else {
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(0.8, audioCtx.currentTime);
     btn.textContent = '🔊 MÚSICA';
     btn.classList.remove('muted');
+    musicStarted = false; // permite que startMusic() arranque de nuevo
     startMusic();
   }
 }
