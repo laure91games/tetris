@@ -17,11 +17,7 @@
       color: #eee;
     }
 
-    #game-container {
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
-    }
+    #game-container { display: flex; gap: 24px; align-items: flex-start; }
 
     #board-wrapper {
       display: flex;
@@ -43,12 +39,7 @@
       background: #0a0a1a;
     }
 
-    #side-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      min-width: 140px;
-    }
+    #side-panel { display: flex; flex-direction: column; gap: 16px; min-width: 140px; }
 
     .panel-box {
       border: 2px solid #16213e;
@@ -56,7 +47,6 @@
       border-radius: 6px;
       padding: 12px;
     }
-
     .panel-box h3 {
       font-size: 0.7rem;
       letter-spacing: 0.2em;
@@ -64,40 +54,18 @@
       margin-bottom: 8px;
       text-transform: uppercase;
     }
+    .panel-box .value { font-size: 1.6rem; color: #e94560; font-weight: bold; }
 
-    .panel-box .value {
-      font-size: 1.6rem;
-      color: #e94560;
-      font-weight: bold;
-    }
-
-    #next-canvas, #hold-canvas {
-      display: block;
-      background: #0a0a1a;
-      border: 1px solid #333;
-    }
-
+    #next-canvas, #hold-canvas { display: block; background: #0a0a1a; border: 1px solid #333; }
     #hold-box.blocked { opacity: 0.4; }
 
-    /* Story challenge box */
+    /* Challenge box */
     #challenge-box { display: none; }
     #challenge-box.visible { display: block; }
     #challenge-title { font-size: 0.75rem; color: #f0a000; margin-bottom: 4px; }
     #challenge-obj { font-size: 0.65rem; color: #aaa; margin-bottom: 8px; line-height: 1.4; }
-    #challenge-progress-bar {
-      height: 6px;
-      background: #0a0a1a;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 4px;
-    }
-    #challenge-progress-fill {
-      height: 100%;
-      background: #f0a000;
-      border-radius: 3px;
-      transition: width 0.3s;
-      width: 0%;
-    }
+    #challenge-progress-bar { height: 6px; background: #0a0a1a; border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+    #challenge-progress-fill { height: 100%; background: #f0a000; border-radius: 3px; transition: width 0.3s; width: 0%; }
     #challenge-progress-text { font-size: 0.7rem; color: #f0a000; text-align: right; }
     #challenge-timer { font-size: 1.1rem; color: #e94560; font-weight: bold; margin-top: 4px; }
 
@@ -106,295 +74,123 @@
     #controls table { width: 100%; border-collapse: collapse; }
     #controls td { padding: 3px 0; vertical-align: middle; }
     #controls td:first-child { color: #aaa; text-align: right; padding-right: 6px; }
-
     #edit-controls-btn {
-      margin-top: 10px;
-      width: 100%;
-      padding: 6px 0;
-      background: transparent;
-      color: #555;
-      border: 1px solid #333;
-      border-radius: 4px;
-      font-size: 0.65rem;
-      font-family: 'Courier New', monospace;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
+      margin-top: 10px; width: 100%; padding: 6px 0;
+      background: transparent; color: #555; border: 1px solid #333; border-radius: 4px;
+      font-size: 0.65rem; font-family: 'Courier New', monospace; letter-spacing: 0.1em;
+      cursor: pointer; transition: color 0.2s, border-color 0.2s;
     }
     #edit-controls-btn:hover { color: #aaa; border-color: #666; }
 
     /* Keybind modal */
-    #keybind-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #000000dd;
-      justify-content: center;
-      align-items: center;
-      z-index: 20;
-    }
+    #keybind-modal { display: none; position: fixed; inset: 0; background: #000000dd; justify-content: center; align-items: center; z-index: 20; }
     #keybind-modal.open { display: flex; }
-    #keybind-panel {
-      background: #16213e;
-      border: 2px solid #e94560;
-      border-radius: 8px;
-      padding: 24px;
-      min-width: 280px;
-    }
-    #keybind-panel h2 {
-      font-size: 1rem;
-      letter-spacing: 0.2em;
-      color: #e94560;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-    .keybind-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px solid #ffffff0a;
-      font-size: 0.8rem;
-    }
+    #keybind-panel { background: #16213e; border: 2px solid #e94560; border-radius: 8px; padding: 24px; min-width: 280px; }
+    #keybind-panel h2 { font-size: 1rem; letter-spacing: 0.2em; color: #e94560; margin-bottom: 16px; text-align: center; }
+    .keybind-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #ffffff0a; font-size: 0.8rem; }
     .keybind-row .action-name { color: #aaa; }
-    .keybind-btn {
-      min-width: 80px;
-      padding: 4px 10px;
-      background: #0a0a1a;
-      color: #eee;
-      border: 1px solid #444;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.75rem;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color 0.15s, color 0.15s;
-    }
+    .keybind-btn { min-width: 80px; padding: 4px 10px; background: #0a0a1a; color: #eee; border: 1px solid #444; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.75rem; cursor: pointer; text-align: center; transition: border-color 0.15s, color 0.15s; }
     .keybind-btn:hover { border-color: #e94560; color: #e94560; }
-    .keybind-btn.listening {
-      border-color: #f0a000;
-      color: #f0a000;
-      animation: blink 0.7s infinite;
-    }
+    .keybind-btn.listening { border-color: #f0a000; color: #f0a000; animation: blink 0.7s infinite; }
     @keyframes blink { 50% { opacity: 0.4; } }
-    #keybind-close {
-      margin-top: 16px;
-      width: 100%;
-      padding: 8px 0;
-      background: #e94560;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-    }
+    #keybind-close { margin-top: 16px; width: 100%; padding: 8px 0; background: #e94560; color: white; border: none; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 0.85rem; letter-spacing: 0.1em; cursor: pointer; }
     #keybind-close:hover { background: #c73050; }
-    #keybind-conflict {
-      font-size: 0.65rem;
-      color: #e94560;
-      min-height: 1.2em;
-      text-align: center;
-      margin-top: 8px;
-    }
+    #keybind-conflict { font-size: 0.65rem; color: #e94560; min-height: 1.2em; text-align: center; margin-top: 8px; }
 
     /* Main overlay */
-    #overlay {
-      position: fixed;
-      inset: 0;
-      background: #000000cc;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 14px;
-      z-index: 10;
-    }
+    #overlay { position: fixed; inset: 0; background: #000000cc; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; z-index: 10; }
+    #overlay h2 { font-size: 2.5rem; color: #e94560; text-shadow: 0 0 30px #e94560; letter-spacing: 0.2em; }
+    #overlay p { color: #aaa; font-size: 0.95rem; text-align: center; max-width: 360px; line-height: 1.6; }
 
-    #overlay h2 {
-      font-size: 2.5rem;
-      color: #e94560;
-      text-shadow: 0 0 30px #e94560;
-      letter-spacing: 0.2em;
-    }
-
-    #overlay p { color: #aaa; font-size: 0.95rem; text-align: center; max-width: 320px; line-height: 1.6; }
-
-    .ov-btn {
-      padding: 12px 32px;
-      background: #e94560;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      font-family: 'Courier New', monospace;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+    .ov-btn { padding: 12px 32px; background: #e94560; color: white; border: none; border-radius: 4px; font-size: 1rem; font-family: 'Courier New', monospace; letter-spacing: 0.1em; cursor: pointer; transition: background 0.2s; }
     .ov-btn:hover { background: #c73050; }
-    .ov-btn.secondary {
-      background: transparent;
-      border: 1px solid #555;
-      color: #aaa;
-    }
+    .ov-btn.secondary { background: transparent; border: 1px solid #555; color: #aaa; }
     .ov-btn.secondary:hover { border-color: #aaa; color: #eee; background: transparent; }
 
     #final-score { font-size: 1.2rem; color: #fff; }
 
     /* Chapter select */
-    #chapter-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 380px;
-      overflow-y: auto;
-      width: 340px;
-      padding-right: 4px;
+    #chapter-scroll { max-height: 420px; overflow-y: auto; width: 360px; padding-right: 4px; }
+    #chapter-scroll::-webkit-scrollbar { width: 4px; }
+    #chapter-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .diff-section { margin-bottom: 12px; }
+    .diff-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; margin-bottom: 6px;
+      border-radius: 4px; font-size: 0.7rem; letter-spacing: 0.2em;
+      text-transform: uppercase; font-weight: bold;
     }
-    #chapter-list::-webkit-scrollbar { width: 4px; }
-    #chapter-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    .diff-header .diff-badge { font-size: 0.65rem; margin-left: auto; color: inherit; opacity: 0.7; }
+    .diff-header.easy  { background: #00c87815; color: #00c878; border-left: 3px solid #00c878; }
+    .diff-header.medium { background: #f0a00015; color: #f0a000; border-left: 3px solid #f0a000; }
+    .diff-header.hard  { background: #e9456015; color: #e94560; border-left: 3px solid #e94560; }
+    .diff-header.locked-section { opacity: 0.4; }
 
     .chapter-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      background: #16213e;
-      border: 1px solid #222;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: #16213e; border: 1px solid #222;
+      border-radius: 6px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      margin-bottom: 6px;
     }
     .chapter-card:hover:not(.locked) { border-color: #e94560; background: #1e2d4e; }
-    .chapter-card.locked { opacity: 0.35; cursor: default; }
-    .chapter-card.completed { border-color: #00f000; }
+    .chapter-card.locked { opacity: 0.3; cursor: default; }
+    .chapter-card.completed { border-color: #00c87855; }
+    .chapter-card.easy.completed   { border-color: #00c87888; }
+    .chapter-card.medium.completed { border-color: #f0a00088; }
+    .chapter-card.hard.completed   { border-color: #e9456088; }
 
-    .chapter-num {
-      font-size: 1.2rem;
-      color: #e94560;
-      min-width: 28px;
-      text-align: center;
-    }
-    .chapter-card.completed .chapter-num { color: #00f000; }
-    .chapter-card.locked .chapter-num { color: #555; }
+    .chapter-num { font-size: 1rem; min-width: 24px; text-align: center; color: #555; }
+    .chapter-card.easy   .chapter-num { color: #00c878; }
+    .chapter-card.medium .chapter-num { color: #f0a000; }
+    .chapter-card.hard   .chapter-num { color: #e94560; }
+    .chapter-card.locked .chapter-num { color: #333; }
 
     .chapter-info { flex: 1; }
     .chapter-info .ch-title { font-size: 0.85rem; color: #eee; margin-bottom: 2px; }
-    .chapter-info .ch-obj { font-size: 0.65rem; color: #666; }
-    .chapter-card.completed .ch-obj { color: #00a000; }
-
-    .chapter-badge {
-      font-size: 1rem;
-      min-width: 20px;
-      text-align: center;
-    }
+    .chapter-info .ch-obj { font-size: 0.65rem; color: #555; }
+    .chapter-card.completed .ch-obj { color: #666; }
+    .chapter-badge { font-size: 0.9rem; min-width: 20px; text-align: center; }
 
     /* Chapter intro */
-    #chapter-intro-num {
-      font-size: 0.75rem;
-      letter-spacing: 0.3em;
-      color: #f0a000;
-      text-transform: uppercase;
+    .diff-pill {
+      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; font-weight: bold;
     }
-    #chapter-intro-title {
-      font-size: 1.6rem;
-      color: #eee;
-      letter-spacing: 0.1em;
-      margin: 4px 0 12px;
-    }
-    #chapter-intro-narrative {
-      color: #888;
-      font-size: 0.85rem;
-      text-align: center;
-      max-width: 300px;
-      line-height: 1.7;
-      margin-bottom: 4px;
-    }
-    .objective-badge {
-      background: #0a0a1a;
-      border: 1px solid #f0a000;
-      border-radius: 4px;
-      padding: 8px 20px;
-      font-size: 0.8rem;
-      color: #f0a000;
-      text-align: center;
-    }
+    .diff-pill.easy   { background: #00c87820; color: #00c878; border: 1px solid #00c878; }
+    .diff-pill.medium { background: #f0a00020; color: #f0a000; border: 1px solid #f0a000; }
+    .diff-pill.hard   { background: #e9456020; color: #e94560; border: 1px solid #e94560; }
 
-    /* Chapter result */
+    #chapter-intro-title { font-size: 1.6rem; color: #eee; letter-spacing: 0.1em; margin: 6px 0 12px; }
+    #chapter-intro-narrative { color: #888; font-size: 0.85rem; text-align: center; max-width: 300px; line-height: 1.7; margin-bottom: 4px; }
+    .objective-badge { background: #0a0a1a; border: 1px solid #f0a000; border-radius: 4px; padding: 8px 20px; font-size: 0.8rem; color: #f0a000; text-align: center; }
+
+    /* Result */
     .result-icon { font-size: 3rem; }
-    .result-stats {
-      font-size: 0.8rem;
-      color: #666;
-      text-align: center;
-      line-height: 2;
-    }
+    .result-stats { font-size: 0.8rem; color: #666; text-align: center; line-height: 2; }
     .result-stats span { color: #aaa; }
 
-    /* Profile screens */
-    #profile-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 300px;
-      max-height: 280px;
-      overflow-y: auto;
-    }
+    /* Profiles */
+    #profile-list { display: flex; flex-direction: column; gap: 8px; width: 300px; max-height: 280px; overflow-y: auto; }
     #profile-list::-webkit-scrollbar { width: 4px; }
     #profile-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-    .profile-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      background: #16213e;
-      border: 1px solid #222;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
+    .profile-card { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #16213e; border: 1px solid #222; border-radius: 6px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
     .profile-card:hover { border-color: #e94560; background: #1e2d4e; }
-    .profile-avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: #e94560;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; font-weight: bold; color: white; flex-shrink: 0;
-    }
+    .profile-avatar { width: 36px; height: 36px; border-radius: 50%; background: #e94560; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white; flex-shrink: 0; }
     .profile-info { flex: 1; }
     .profile-info .p-name { font-size: 0.9rem; color: #eee; }
     .profile-info .p-stats { font-size: 0.65rem; color: #555; margin-top: 2px; }
-
-    .profile-delete {
-      background: none; border: none; color: #333; font-size: 1rem;
-      cursor: pointer; padding: 4px; transition: color 0.15s;
-    }
+    .profile-delete { background: none; border: none; color: #333; font-size: 1rem; cursor: pointer; padding: 4px; transition: color 0.15s; }
     .profile-delete:hover { color: #e94560; }
 
-    .name-input {
-      padding: 10px 14px;
-      background: #0a0a1a;
-      border: 1px solid #444;
-      border-radius: 4px;
-      color: #eee;
-      font-family: 'Courier New', monospace;
-      font-size: 1rem;
-      width: 240px;
-      text-align: center;
-      letter-spacing: 0.1em;
-      outline: none;
-      transition: border-color 0.15s;
-    }
+    .name-input { padding: 10px 14px; background: #0a0a1a; border: 1px solid #444; border-radius: 4px; color: #eee; font-family: 'Courier New', monospace; font-size: 1rem; width: 240px; text-align: center; letter-spacing: 0.1em; outline: none; transition: border-color 0.15s; }
     .name-input:focus { border-color: #e94560; }
     .name-input::placeholder { color: #444; }
     .input-error { font-size: 0.7rem; color: #e94560; min-height: 1em; }
 
-    /* Active player indicator in side panel */
+    /* Player box */
     #player-box { cursor: pointer; transition: border-color 0.15s; }
     #player-box:hover { border-color: #e94560; }
-    #player-box h3 { margin-bottom: 4px; }
     #player-name-display { font-size: 1rem; color: #eee; font-weight: bold; }
     #player-best { font-size: 0.65rem; color: #555; margin-top: 2px; }
   </style>
@@ -406,7 +202,6 @@
     <h1>TETRIS</h1>
     <canvas id="board" width="300" height="600"></canvas>
   </div>
-
   <div id="side-panel">
     <div class="panel-box" id="player-box" title="Cambiar jugador">
       <h3>Jugador</h3>
@@ -496,59 +291,114 @@ const SHAPES = [
   [[1,1,0],[0,1,1],[0,0,0]],
 ];
 
-const CHAPTERS = [
-  {
-    title: 'El Despertar',
-    narrative: 'Los bloques caen por primera vez.\nDemuestra que puedes ordenar el caos.',
-    objectiveText: 'Limpia 5 líneas',
-    challenge: { type: 'lines', target: 5 },
-    speed: 800,
-  },
-  {
-    title: 'Contrarreloj',
-    narrative: 'El tiempo no espera.\nLimpia 10 líneas antes de que se acabe.',
-    objectiveText: 'Limpia 10 líneas en 60 seg',
-    challenge: { type: 'lines_timed', target: 10, timeLimit: 60 },
-    speed: 700,
-  },
-  {
-    title: 'El Caos',
-    narrative: 'El tablero ya está desordenado.\nAlguien dejó este lío. Solo tú puedes arreglarlo.',
-    objectiveText: 'Limpia 10 líneas (tablero pre-relleno)',
-    challenge: { type: 'lines', target: 10 },
-    speed: 650,
-    prefilled: 10,
-  },
-  {
-    title: 'La Tormenta',
-    narrative: 'Las piezas caen sin descanso.\nSobrevive 90 segundos sin perder.',
-    objectiveText: 'Sobrevive 90 segundos',
-    challenge: { type: 'survive', timeLimit: 90 },
-    speed: 180,
-  },
-  {
-    title: 'El Maestro',
-    narrative: 'El conocimiento no basta.\nDemuestra que dominas el tablero.',
-    objectiveText: 'Alcanza 3000 puntos',
-    challenge: { type: 'score', target: 3000 },
-    speed: 600,
-  },
-  {
-    title: 'Sin Red',
-    narrative: 'Las medias tintas no sirven aquí.\nSolo cuenta borrar cuatro líneas de golpe.',
-    objectiveText: 'Consigue 3 Tetris (4 líneas de golpe)',
-    challenge: { type: 'tetris', target: 3 },
-    speed: 650,
-  },
-];
+const DIFFS = ['easy', 'medium', 'hard'];
+const DIFF_LABELS = { easy: 'Fácil', medium: 'Medio', hard: 'Difícil' };
+const DIFF_COLORS = { easy: '#00c878', medium: '#f0a000', hard: '#e94560' };
+
+const CHAPTERS = {
+  easy: [
+    {
+      title: 'El Despertar',
+      narrative: 'Los bloques caen por primera vez.\nDemuestra que puedes ordenar el caos.',
+      objectiveText: 'Limpia 5 líneas',
+      challenge: { type: 'lines', target: 5 },
+      speed: 800,
+    },
+    {
+      title: 'Primeros Pasos',
+      narrative: 'Ya conoces el ritmo.\nAhora demuestra que no fue suerte.',
+      objectiveText: 'Limpia 8 líneas',
+      challenge: { type: 'lines', target: 8 },
+      speed: 800,
+    },
+    {
+      title: 'El Calentamiento',
+      narrative: 'El tablero no descansa.\nResiste el tiempo suficiente para seguir adelante.',
+      objectiveText: 'Sobrevive 45 segundos',
+      challenge: { type: 'survive', timeLimit: 45 },
+      speed: 700,
+    },
+    {
+      title: 'Horizonte',
+      narrative: 'Cada pieza bien colocada vale puntos.\nLlega al horizonte y demuestra tu potencial.',
+      objectiveText: 'Alcanza 800 puntos',
+      challenge: { type: 'score', target: 800 },
+      speed: 750,
+    },
+  ],
+  medium: [
+    {
+      title: 'Contrarreloj',
+      narrative: 'El tiempo no espera.\nLimpia 10 líneas antes de que se acabe.',
+      objectiveText: 'Limpia 10 líneas en 60 seg',
+      challenge: { type: 'lines_timed', target: 10, timeLimit: 60 },
+      speed: 700,
+    },
+    {
+      title: 'El Caos',
+      narrative: 'El tablero ya está desordenado.\nAlguien dejó este lío. Solo tú puedes arreglarlo.',
+      objectiveText: 'Limpia 10 líneas (tablero lleno)',
+      challenge: { type: 'lines', target: 10 },
+      speed: 650,
+      prefilled: 10,
+    },
+    {
+      title: 'Doble Filo',
+      narrative: 'Una línea no basta. Cuatro o nada.\nDemuestra que sabes planificar.',
+      objectiveText: 'Consigue 2 Tetris (4 líneas de golpe)',
+      challenge: { type: 'tetris', target: 2 },
+      speed: 550,
+    },
+    {
+      title: 'La Carrera',
+      narrative: 'Los puntos no caen solos.\nMarca 2000 antes de que el reloj te gane.',
+      objectiveText: 'Alcanza 2000 puntos en 120 seg',
+      challenge: { type: 'score_timed', target: 2000, timeLimit: 120 },
+      speed: 550,
+    },
+  ],
+  hard: [
+    {
+      title: 'La Tormenta',
+      narrative: 'Las piezas caen sin descanso.\nSobrevive 90 segundos sin perder.',
+      objectiveText: 'Sobrevive 90 segundos',
+      challenge: { type: 'survive', timeLimit: 90 },
+      speed: 180,
+    },
+    {
+      title: 'Sin Red',
+      narrative: 'Las medias tintas no sirven aquí.\nSolo cuenta borrar cuatro líneas de golpe.',
+      objectiveText: 'Consigue 3 Tetris (4 líneas de golpe)',
+      challenge: { type: 'tetris', target: 3 },
+      speed: 400,
+    },
+    {
+      title: 'El Maestro',
+      narrative: 'El conocimiento no basta.\nDemuestra que dominas el tablero completamente.',
+      objectiveText: 'Alcanza 3000 puntos',
+      challenge: { type: 'score', target: 3000 },
+      speed: 350,
+    },
+    {
+      title: 'El Abismo',
+      narrative: 'El fondo ya está ocupado y el reloj corre.\nLimpia 20 líneas desde el caos más profundo.',
+      objectiveText: 'Limpia 20 líneas (tablero lleno)',
+      challenge: { type: 'lines', target: 20 },
+      speed: 200,
+      prefilled: 12,
+    },
+  ],
+};
+
+const TOTAL_CHAPTERS = DIFFS.reduce((n, d) => n + CHAPTERS[d].length, 0);
 
 // ─── Canvas refs ─────────────────────────────────────────────────────────────
-const board     = document.getElementById('board');
-const ctx       = board.getContext('2d');
+const board      = document.getElementById('board');
+const ctx        = board.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
-const nCtx      = nextCanvas.getContext('2d');
+const nCtx       = nextCanvas.getContext('2d');
 const holdCanvas = document.getElementById('hold-canvas');
-const hCtx      = holdCanvas.getContext('2d');
+const hCtx       = holdCanvas.getContext('2d');
 
 // ─── State ───────────────────────────────────────────────────────────────────
 let bindings = { ...DEFAULT_BINDINGS };
@@ -557,17 +407,22 @@ let grid, piece, nextPiece, holdPiece, canHold;
 let score, level, lines, paused, gameOver, dropInterval, lastTime, animFrame;
 
 let gameMode = 'free';
-let currentChapter = 0;
+let currentChapter = { diff: 'easy', idx: 0 };
 let challengeState = {};
 
 // ─── Profile system ──────────────────────────────────────────────────────────
-// { name: { storyProgress: [], bestScore: 0 }, ... }
-let profiles = JSON.parse(localStorage.getItem('tetrisProfiles') || '{}');
+let profiles    = JSON.parse(localStorage.getItem('tetrisProfiles') || '{}');
 let activeProfile = localStorage.getItem('tetrisActiveProfile') || null;
 
+const EMPTY_PROGRESS = () => ({ easy: [], medium: [], hard: [] });
+
 function currentProfileData() {
-  if (!activeProfile || !profiles[activeProfile]) return { storyProgress: [], bestScore: 0 };
-  return profiles[activeProfile];
+  if (!activeProfile || !profiles[activeProfile])
+    return { storyProgress: EMPTY_PROGRESS(), bestScore: 0 };
+  const d = profiles[activeProfile];
+  // migrate old flat-array format
+  if (Array.isArray(d.storyProgress)) d.storyProgress = EMPTY_PROGRESS();
+  return d;
 }
 
 function saveProfiles() {
@@ -579,7 +434,8 @@ function setActiveProfile(name) {
   localStorage.setItem('tetrisActiveProfile', name);
   const data = currentProfileData();
   document.getElementById('player-name-display').textContent = name;
-  document.getElementById('player-best').textContent = data.bestScore > 0 ? `Récord: ${data.bestScore}` : '';
+  document.getElementById('player-best').textContent =
+    data.bestScore > 0 ? `Récord: ${data.bestScore}` : '';
 }
 
 function saveProgress() {
@@ -597,6 +453,19 @@ function updateBestScore(s) {
   }
 }
 
+let storyProgress = EMPTY_PROGRESS();
+
+function totalCompleted(sp) {
+  return DIFFS.reduce((n, d) => n + (sp[d] || []).filter(Boolean).length, 0);
+}
+
+function diffUnlocked(diff) {
+  if (diff === 'easy') return true;
+  if (diff === 'medium') return CHAPTERS.easy.every((_, i) => storyProgress.easy[i]);
+  if (diff === 'hard')   return CHAPTERS.medium.every((_, i) => storyProgress.medium[i]);
+  return false;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function keyLabel(k) {
   const map = { ' ': 'Espacio', ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Escape: 'Esc', Enter: 'Enter' };
@@ -611,11 +480,9 @@ function createGrid() {
 function buildPrefilledGrid(filledRows) {
   const g = createGrid();
   for (let r = ROWS - 1; r >= ROWS - filledRows; r--) {
-    // Random row with one gap
     const gap = Math.floor(Math.random() * COLS);
-    for (let c = 0; c < COLS; c++) {
+    for (let c = 0; c < COLS; c++)
       g[r][c] = c === gap ? 0 : Math.floor(Math.random() * 7) + 1;
-    }
   }
   return g;
 }
@@ -688,19 +555,14 @@ function clearLines() {
 }
 
 function checkChallenge(clearedNow) {
-  const ch = CHAPTERS[currentChapter].challenge;
+  const ch = CHAPTERS[currentChapter.diff][currentChapter.idx].challenge;
 
-  if (ch.type === 'lines') {
+  if (ch.type === 'lines' || ch.type === 'lines_timed') {
     const pct = Math.min(lines / ch.target, 1);
     updateChallengeUI(`${lines} / ${ch.target}`, pct);
     if (lines >= ch.target) chapterComplete();
   }
-  else if (ch.type === 'lines_timed') {
-    const pct = Math.min(lines / ch.target, 1);
-    updateChallengeUI(`${lines} / ${ch.target}`, pct);
-    if (lines >= ch.target) chapterComplete();
-  }
-  else if (ch.type === 'score') {
+  else if (ch.type === 'score' || ch.type === 'score_timed') {
     const pct = Math.min(score / ch.target, 1);
     updateChallengeUI(`${score} / ${ch.target}`, pct);
     if (score >= ch.target) chapterComplete();
@@ -718,7 +580,7 @@ function updateChallengeUI(text, pct) {
   document.getElementById('challenge-progress-fill').style.width = (pct * 100) + '%';
 }
 
-// ─── UI update ───────────────────────────────────────────────────────────────
+// ─── UI ──────────────────────────────────────────────────────────────────────
 function updateUI() {
   document.getElementById('score').textContent = score;
   document.getElementById('level').textContent = level;
@@ -736,12 +598,12 @@ function drawBlock(context, x, y, type, alpha = 1) {
   if (!type) return;
   context.globalAlpha = alpha;
   context.fillStyle = COLORS[type];
-  context.fillRect(x * BLOCK + 1, y * BLOCK + 1, BLOCK - 2, BLOCK - 2);
+  context.fillRect(x*BLOCK+1, y*BLOCK+1, BLOCK-2, BLOCK-2);
   context.fillStyle = 'rgba(255,255,255,0.3)';
-  context.fillRect(x * BLOCK + 1, y * BLOCK + 1, BLOCK - 2, 4);
-  context.fillRect(x * BLOCK + 1, y * BLOCK + 1, 4, BLOCK - 2);
+  context.fillRect(x*BLOCK+1, y*BLOCK+1, BLOCK-2, 4);
+  context.fillRect(x*BLOCK+1, y*BLOCK+1, 4, BLOCK-2);
   context.fillStyle = 'rgba(0,0,0,0.2)';
-  context.fillRect(x * BLOCK + 1, y * BLOCK + BLOCK - 5, BLOCK - 2, 4);
+  context.fillRect(x*BLOCK+1, y*BLOCK+BLOCK-5, BLOCK-2, 4);
   context.globalAlpha = 1;
 }
 
@@ -753,20 +615,16 @@ function getGhost() {
 
 function draw() {
   ctx.clearRect(0, 0, board.width, board.height);
-  ctx.strokeStyle = '#ffffff08';
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#ffffff08'; ctx.lineWidth = 1;
   for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r*BLOCK); ctx.lineTo(COLS*BLOCK, r*BLOCK); ctx.stroke(); }
   for (let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c*BLOCK, 0); ctx.lineTo(c*BLOCK, ROWS*BLOCK); ctx.stroke(); }
-
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, grid[r][c]);
-
   const ghost = getGhost();
   for (let r = 0; r < ghost.shape.length; r++)
     for (let c = 0; c < ghost.shape[r].length; c++)
       if (ghost.shape[r][c]) drawBlock(ctx, ghost.x+c, ghost.y+r, piece.type, 0.2);
-
   for (let r = 0; r < piece.shape.length; r++)
     for (let c = 0; c < piece.shape[r].length; c++)
       if (piece.shape[r][c]) drawBlock(ctx, piece.x+c, piece.y+r, piece.type);
@@ -820,20 +678,18 @@ function gameLoop(ts) {
     else lock();
   }
 
-  // Story mode timers
   if (gameMode === 'story' && !paused && !gameOver) {
-    const ch = CHAPTERS[currentChapter].challenge;
+    const ch = CHAPTERS[currentChapter.diff][currentChapter.idx].challenge;
     const elapsed = (ts - challengeState.startTs) / 1000;
 
     if (ch.type === 'survive') {
-      const remaining = Math.max(0, ch.timeLimit - elapsed);
-      document.getElementById('challenge-timer').textContent = fmtTime(remaining);
-      const pct = elapsed / ch.timeLimit;
-      updateChallengeUI(fmtTime(remaining), Math.min(pct, 1));
+      const rem = Math.max(0, ch.timeLimit - elapsed);
+      document.getElementById('challenge-timer').textContent = fmtTime(rem);
+      updateChallengeUI(fmtTime(rem), Math.min(elapsed / ch.timeLimit, 1));
       if (elapsed >= ch.timeLimit) { chapterComplete(); return; }
-    } else if (ch.type === 'lines_timed') {
-      const remaining = Math.max(0, ch.timeLimit - elapsed);
-      document.getElementById('challenge-timer').textContent = fmtTime(remaining);
+    } else if (ch.type === 'lines_timed' || ch.type === 'score_timed') {
+      const rem = Math.max(0, ch.timeLimit - elapsed);
+      document.getElementById('challenge-timer').textContent = fmtTime(rem);
       if (elapsed >= ch.timeLimit) { chapterFailed(); return; }
     }
   }
@@ -843,8 +699,7 @@ function gameLoop(ts) {
 }
 
 function fmtTime(s) {
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, '0')}`;
 }
 
@@ -873,10 +728,10 @@ function startFreeGame() {
   animFrame = requestAnimationFrame(gameLoop);
 }
 
-function startChapter(idx) {
+function startChapter(diff, idx) {
   gameMode = 'story';
-  currentChapter = idx;
-  const ch = CHAPTERS[idx];
+  currentChapter = { diff, idx };
+  const ch = CHAPTERS[diff][idx];
   dropInterval = ch.speed;
   challengeState = { tetrisCount: 0, startTs: performance.now() };
 
@@ -889,7 +744,6 @@ function startChapter(idx) {
   updateChallengeUI('0', 0);
 
   resetGameState(ch.prefilled || 0);
-  // reset startTs after grid build
   challengeState.startTs = performance.now();
   hideOverlay();
   if (animFrame) cancelAnimationFrame(animFrame);
@@ -915,43 +769,50 @@ function endGame() {
   }
 }
 
+function nextChapterOf(diff, idx) {
+  const chapters = CHAPTERS[diff];
+  if (idx + 1 < chapters.length) return { diff, idx: idx + 1 };
+  const nextDiffIdx = DIFFS.indexOf(diff) + 1;
+  if (nextDiffIdx < DIFFS.length) return { diff: DIFFS[nextDiffIdx], idx: 0 };
+  return null;
+}
+
 function chapterComplete() {
   gameOver = true;
   updateBestScore(score);
-  storyProgress[currentChapter] = true;
+  const { diff, idx } = currentChapter;
+  if (!storyProgress[diff]) storyProgress[diff] = [];
+  storyProgress[diff][idx] = true;
   saveProgress();
-  const next = currentChapter + 1;
-  const hasNext = next < CHAPTERS.length;
+
+  const next = nextChapterOf(diff, idx);
+  const color = DIFF_COLORS[diff];
   showOverlay(`
     <div class="result-icon">⭐</div>
     <h2>¡COMPLETADO!</h2>
-    <p style="color:#f0a000;font-size:0.8rem;letter-spacing:0.2em">${CHAPTERS[currentChapter].title.toUpperCase()}</p>
-    <div class="result-stats">
-      Puntos: <span>${score}</span><br>
-      Líneas: <span>${lines}</span>
-    </div>
-    ${hasNext ? `<button class="ov-btn" id="btn-next">SIGUIENTE CAPÍTULO</button>` : '<p style="color:#f0a000">¡Has completado la historia!</p>'}
+    <p style="color:${color};font-size:0.75rem;letter-spacing:0.2em">${DIFF_LABELS[diff].toUpperCase()} · ${CHAPTERS[diff][idx].title.toUpperCase()}</p>
+    <div class="result-stats">Puntos: <span>${score}</span><br>Líneas: <span>${lines}</span></div>
+    ${next ? `<button class="ov-btn" id="btn-next">SIGUIENTE RETO</button>` : '<p style="color:#f0a000">¡Has completado todos los retos!</p>'}
     <button class="ov-btn secondary" id="btn-chapters">VER CAPÍTULOS</button>
   `, el => {
-    if (hasNext) el.querySelector('#btn-next').onclick = () => showChapterIntro(next);
+    if (next) el.querySelector('#btn-next').onclick = () => showChapterIntro(next.diff, next.idx);
     el.querySelector('#btn-chapters').onclick = showChapterSelect;
   });
 }
 
 function chapterFailed() {
   gameOver = true;
+  const { diff, idx } = currentChapter;
+  const color = DIFF_COLORS[diff];
   showOverlay(`
     <div class="result-icon">💀</div>
     <h2>FALLIDO</h2>
-    <p style="color:#888;font-size:0.8rem;letter-spacing:0.2em">${CHAPTERS[currentChapter].title.toUpperCase()}</p>
-    <div class="result-stats">
-      Puntos: <span>${score}</span><br>
-      Líneas: <span>${lines}</span>
-    </div>
+    <p style="color:${color};font-size:0.75rem;letter-spacing:0.2em">${DIFF_LABELS[diff].toUpperCase()} · ${CHAPTERS[diff][idx].title.toUpperCase()}</p>
+    <div class="result-stats">Puntos: <span>${score}</span><br>Líneas: <span>${lines}</span></div>
     <button class="ov-btn" id="btn-retry">REINTENTAR</button>
     <button class="ov-btn secondary" id="btn-chapters">VER CAPÍTULOS</button>
   `, el => {
-    el.querySelector('#btn-retry').onclick = () => showChapterIntro(currentChapter);
+    el.querySelector('#btn-retry').onclick = () => showChapterIntro(diff, idx);
     el.querySelector('#btn-chapters').onclick = showChapterSelect;
   });
 }
@@ -971,18 +832,88 @@ function hideOverlay() {
 function showMainMenu() {
   if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
   gameOver = true;
-  const data = currentProfileData();
-  const chapsDone = data.storyProgress.filter(Boolean).length;
+  const done = totalCompleted(storyProgress);
   showOverlay(`
     <h2>TETRIS</h2>
     <p style="color:#e94560;font-size:0.8rem;letter-spacing:0.15em">👤 ${activeProfile}</p>
     <button class="ov-btn" id="btn-free">MODO LIBRE</button>
-    <button class="ov-btn secondary" id="btn-story">MODO HISTORIA ${chapsDone > 0 ? `(${chapsDone}/${CHAPTERS.length})` : ''}</button>
+    <button class="ov-btn secondary" id="btn-story">MODO HISTORIA ${done > 0 ? `(${done}/${TOTAL_CHAPTERS})` : ''}</button>
     <button class="ov-btn secondary" id="btn-change">CAMBIAR JUGADOR</button>
   `, el => {
     el.querySelector('#btn-free').onclick = startFreeGame;
     el.querySelector('#btn-story').onclick = showChapterSelect;
     el.querySelector('#btn-change').onclick = showProfileSelect;
+  });
+}
+
+function showChapterSelect() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  gameOver = true;
+
+  const sections = DIFFS.map(diff => {
+    const chapters = CHAPTERS[diff];
+    const diffDone = chapters.every((_, i) => storyProgress[diff]?.[i]);
+    const unlocked = diffUnlocked(diff);
+    const doneCount = chapters.filter((_, i) => storyProgress[diff]?.[i]).length;
+
+    const cards = chapters.map((ch, i) => {
+      const done = !!storyProgress[diff]?.[i];
+      const locked = !unlocked || (i > 0 && !storyProgress[diff]?.[i - 1]);
+      const cls = `${diff} ${locked ? 'locked' : done ? 'completed' : ''}`;
+      return `
+        <div class="chapter-card ${cls}" data-diff="${diff}" data-idx="${i}">
+          <div class="chapter-num">${done ? '✓' : i + 1}</div>
+          <div class="chapter-info">
+            <div class="ch-title">${ch.title}</div>
+            <div class="ch-obj">${ch.objectiveText}</div>
+          </div>
+          <div class="chapter-badge">${done ? '⭐' : locked ? '🔒' : ''}</div>
+        </div>
+      `;
+    }).join('');
+
+    const lockNote = !unlocked
+      ? ` — completa ${DIFF_LABELS[DIFFS[DIFFS.indexOf(diff)-1]]} primero`
+      : '';
+
+    return `
+      <div class="diff-section">
+        <div class="diff-header ${diff} ${!unlocked ? 'locked-section' : ''}">
+          ${DIFF_LABELS[diff]}${lockNote}
+          <span class="diff-badge">${doneCount}/${chapters.length}</span>
+        </div>
+        ${cards}
+      </div>
+    `;
+  }).join('');
+
+  showOverlay(`
+    <h2 style="font-size:1.5rem">MODO HISTORIA</h2>
+    <div id="chapter-scroll">${sections}</div>
+    <button class="ov-btn secondary" id="btn-back">← VOLVER</button>
+  `, el => {
+    el.querySelector('#btn-back').onclick = showMainMenu;
+    el.querySelectorAll('.chapter-card:not(.locked)').forEach(card => {
+      card.addEventListener('click', () =>
+        showChapterIntro(card.dataset.diff, +card.dataset.idx)
+      );
+    });
+  });
+}
+
+function showChapterIntro(diff, idx) {
+  const ch = CHAPTERS[diff][idx];
+  const narrativeHtml = ch.narrative.replace(/\n/g, '<br>');
+  showOverlay(`
+    <div class="diff-pill ${diff}">${DIFF_LABELS[diff]}</div>
+    <div id="chapter-intro-title">${ch.title}</div>
+    <p id="chapter-intro-narrative">${narrativeHtml}</p>
+    <div class="objective-badge">🎯 ${ch.objectiveText}</div>
+    <button class="ov-btn" id="btn-play">JUGAR</button>
+    <button class="ov-btn secondary" id="btn-back">← CAPÍTULOS</button>
+  `, el => {
+    el.querySelector('#btn-play').onclick = () => startChapter(diff, idx);
+    el.querySelector('#btn-back').onclick = showChapterSelect;
   });
 }
 
@@ -996,14 +927,14 @@ function showProfileSelect() {
     ? `<p style="color:#555;font-size:0.8rem">No hay perfiles aún.</p>`
     : names.map(name => {
         const d = profiles[name];
-        const done = (d.storyProgress || []).filter(Boolean).length;
-        const initial = name[0].toUpperCase();
+        const sp = Array.isArray(d.storyProgress) ? EMPTY_PROGRESS() : (d.storyProgress || EMPTY_PROGRESS());
+        const done = totalCompleted(sp);
         return `
           <div class="profile-card" data-name="${name}">
-            <div class="profile-avatar">${initial}</div>
+            <div class="profile-avatar">${name[0].toUpperCase()}</div>
             <div class="profile-info">
               <div class="p-name">${name}</div>
-              <div class="p-stats">Historia: ${done}/${CHAPTERS.length} &nbsp;·&nbsp; Récord: ${d.bestScore || 0}</div>
+              <div class="p-stats">Historia: ${done}/${TOTAL_CHAPTERS} &nbsp;·&nbsp; Récord: ${d.bestScore || 0}</div>
             </div>
             <button class="profile-delete" data-del="${name}" title="Eliminar">✕</button>
           </div>
@@ -1023,10 +954,7 @@ function showProfileSelect() {
       });
     });
     el.querySelectorAll('.profile-delete').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        deleteProfile(btn.dataset.del);
-      });
+      btn.addEventListener('click', e => { e.stopPropagation(); deleteProfile(btn.dataset.del); });
     });
     el.querySelector('#btn-new-profile').onclick = showNewProfile;
     if (activeProfile) el.querySelector('#btn-back').onclick = showMainMenu;
@@ -1045,16 +973,14 @@ function showNewProfile() {
     const input = el.querySelector('#profile-name-input');
     const error = el.querySelector('#profile-name-error');
     input.focus();
-
     const create = () => {
       const name = input.value.trim();
       if (!name) { error.textContent = 'Escribe un nombre.'; return; }
       if (profiles[name]) { error.textContent = 'Ya existe ese nombre.'; return; }
-      profiles[name] = { storyProgress: [], bestScore: 0 };
+      profiles[name] = { storyProgress: EMPTY_PROGRESS(), bestScore: 0 };
       saveProfiles();
       selectProfile(name);
     };
-
     el.querySelector('#btn-create').onclick = create;
     input.addEventListener('keydown', e => { if (e.key === 'Enter') create(); });
     el.querySelector('#btn-back').onclick = showProfileSelect;
@@ -1063,7 +989,8 @@ function showNewProfile() {
 
 function selectProfile(name) {
   setActiveProfile(name);
-  storyProgress = currentProfileData().storyProgress.slice();
+  const sp = currentProfileData().storyProgress;
+  storyProgress = Array.isArray(sp) ? EMPTY_PROGRESS() : { easy: [...(sp.easy||[])], medium: [...(sp.medium||[])], hard: [...(sp.hard||[])] };
   showMainMenu();
 }
 
@@ -1075,56 +1002,6 @@ function deleteProfile(name) {
     localStorage.removeItem('tetrisActiveProfile');
   }
   showProfileSelect();
-}
-
-function showChapterSelect() {
-  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
-  gameOver = true;
-
-  const cards = CHAPTERS.map((ch, i) => {
-    const done = !!storyProgress[i];
-    const locked = i > 0 && !storyProgress[i - 1];
-    const cls = locked ? 'locked' : done ? 'completed' : '';
-    const badge = done ? '✓' : locked ? '🔒' : `${i + 1}`;
-    const numColor = done ? '✓' : `${i + 1}`;
-    return `
-      <div class="chapter-card ${cls}" data-idx="${i}">
-        <div class="chapter-num">${numColor}</div>
-        <div class="chapter-info">
-          <div class="ch-title">${ch.title}</div>
-          <div class="ch-obj">${ch.objectiveText}</div>
-        </div>
-        <div class="chapter-badge">${done ? '⭐' : locked ? '🔒' : ''}</div>
-      </div>
-    `;
-  }).join('');
-
-  showOverlay(`
-    <h2 style="font-size:1.5rem">MODO HISTORIA</h2>
-    <div id="chapter-list">${cards}</div>
-    <button class="ov-btn secondary" id="btn-back">← VOLVER</button>
-  `, el => {
-    el.querySelector('#btn-back').onclick = showMainMenu;
-    el.querySelectorAll('.chapter-card:not(.locked)').forEach(card => {
-      card.addEventListener('click', () => showChapterIntro(+card.dataset.idx));
-    });
-  });
-}
-
-function showChapterIntro(idx) {
-  const ch = CHAPTERS[idx];
-  const narrativeHtml = ch.narrative.replace(/\n/g, '<br>');
-  showOverlay(`
-    <div id="chapter-intro-num">Capítulo ${idx + 1} de ${CHAPTERS.length}</div>
-    <div id="chapter-intro-title">${ch.title}</div>
-    <p id="chapter-intro-narrative">${narrativeHtml}</p>
-    <div class="objective-badge">🎯 ${ch.objectiveText}</div>
-    <button class="ov-btn" id="btn-play">JUGAR</button>
-    <button class="ov-btn secondary" id="btn-back">← CAPÍTULOS</button>
-  `, el => {
-    el.querySelector('#btn-play').onclick = () => startChapter(idx);
-    el.querySelector('#btn-back').onclick = showChapterSelect;
-  });
 }
 
 // ─── Keyboard ────────────────────────────────────────────────────────────────
@@ -1232,9 +1109,7 @@ document.getElementById('player-box').addEventListener('click', () => {
 renderControls();
 
 if (activeProfile && profiles[activeProfile]) {
-  storyProgress = currentProfileData().storyProgress.slice();
-  setActiveProfile(activeProfile);
-  showMainMenu();
+  selectProfile(activeProfile);
 } else {
   activeProfile = null;
   showProfileSelect();
